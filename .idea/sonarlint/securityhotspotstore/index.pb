@@ -1,0 +1,15 @@
+
+9
+	README.md,8/e/8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
+B
+scripts/lib/lib.js,3/5/35237070f9d324d92e098ea6cb3824c2739941f1
+A
+languages/en.json,0/4/0485a696507a473574db0305ac00d336b8c8f7e8
+;
+.prettierrc,2/0/20137a9e94744624390b6748bc96df5ca1579b71
+;
+module.json,9/7/97433b4c9170874f0a6d484f52676b86fb5d7408
+L
+scripts/challenge-ratings.js,5/8/581aed8a514c6ca6048139035f130c19d9702e1c
+A
+scripts/module.js,2/5/25e7d167d92ccd64b0634c56d5d2abd71dc637e0

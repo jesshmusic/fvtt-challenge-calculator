@@ -1,3 +1,5 @@
 {
-    "MODULE.hello": "hello"
+    "CR-CALC": {
+        "button-calc": "Calculate the Challenge Rating and XP."
+    }
 }

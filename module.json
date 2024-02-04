@@ -1,8 +1,8 @@
 {
-  "id": "module",
-  "title": "New Module",
+  "id": "fvtt-challenge-calculator",
+  "title": "Challenge Rating Calculator",
   "description": "",
-  "version": "#{VERSION}#",
+  "version": "1.0.0",
   "library": "false",
   "manifestPlusVersion": "1.2.0",
   "compatibility": {
@@ -12,9 +12,8 @@
   },
   "authors": [
     {
-      "name": "The League of Extraordinary FVTT Developers",
-      "url": "https://github.com/League-of-Foundry-Developers",
-      "discord": "discordID#0001"
+      "name": "Jess Hendricks",
+      "url": "https://exitentialmusic.com"
     }
   ],
   "relationships": {
@@ -22,7 +21,8 @@
     "requires": []
   },
   "esmodules": [
-    "scripts/module.js"
+    "scripts/module.js",
+    "scripts/challenge-ratings.js"
   ],
   "scripts": [
     "scripts/lib/lib.js"
@@ -37,7 +37,7 @@
       "path": "languages/en.json"
     }
   ],
-  "url": "#{URL}#",
+  "url": "https://github.com/jesshmusic/fvtt-challenge-calculator",
   "manifest": "#{MANIFEST}#",
   "download": "#{DOWNLOAD}#",
   "license": "LICENSE",
