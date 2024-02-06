@@ -18,8 +18,20 @@ class CrCalculator {
 
     const defensiveCR = this.calculateDefensiveCR(actor, data);
     const offensiveCR = this.calculateOffensiveCR(actor, data);
-    const cRating = Math.round((offensiveCR + defensiveCR) / 2);
-    console.log(`OFF CR: ${offensiveCR} - DEF CR: ${defensiveCR} - TOTAL CR: ${cRating}`);
+    let rawCR = (offensiveCR + defensiveCR) / 2;
+    if (rawCR > 0 && rawCR < 0.1875) {
+      rawCR = 0.125;
+    } else if (rawCR >= 0.1875 && rawCR < 0.5) {
+      rawCR = 0.25;
+    } else if (rawCR >= 0.5 && rawCR < 1) {
+      rawCR = 0.5;
+    } else if (rawCR >= 1) {
+      rawCR = 1;
+    }
+    const cRating = rawCR > 1 ? Math.round(rawCR) : rawCR;
+    console.log(
+      `OFF CR: ${offensiveCR} - DEF CR: ${defensiveCR} - Raw CR: ${rawCR} - TOTAL CR: ${cRating}`,
+    );
     await actor.update({
       system: {
         details: {

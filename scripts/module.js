@@ -21,6 +21,9 @@ Hooks.on('renderActorSheet', (actorSheet, html) => {
         ' CR' +
         ' Calc</button>',
     );
+    actorSheet.getData().then((data) => {
+      console.log(data.actor);
+    });
 
     html.on('click', '.cr-calc-button', async (event) => {
       CrCalculator.calculateCRForActor(actorSheet);
