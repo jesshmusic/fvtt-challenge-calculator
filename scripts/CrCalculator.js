@@ -25,7 +25,7 @@ class CrCalculator {
       rawCR = 0.25;
     } else if (rawCR >= 0.5 && rawCR < 1) {
       rawCR = 0.5;
-    } else if (rawCR >= 1) {
+    } else if (rawCR >= 1 && rawCR < 1.5) {
       rawCR = 1;
     }
     const cRating = rawCR > 1 ? Math.round(rawCR) : rawCR;
@@ -47,7 +47,7 @@ class CrCalculator {
     const lairBonus = actor.system.resources.lair.value ? 1 : 0;
     const numFeats = data.items.filter((item) => item.type === 'feat').length;
     const featsBonus = numFeats > 0 ? numFeats / 2 : 0;
-    const damageBonus = actor.system.abilities.str.mod;
+    let damageBonus = actor.system.abilities.str.mod;
     let numAttacks = 1;
     let attackBonus = actor.system.abilities.str.mod + actor.system.attributes.prof;
     const isMulti =
@@ -74,6 +74,18 @@ class CrCalculator {
     const damagesArray = [];
     data.items.forEach((item) => {
       const damages = item.system.damage.parts;
+      const atkBonus =
+        item.system.properties.has('fin') &&
+        actor.system.abilities.dex.mod > actor.system.abilities.str.mod
+          ? actor.system.abilities.dex.mod + actor.system.attributes.prof
+          : attackBonus;
+      attackBonus = atkBonus > attackBonus ? atkBonus : attackBonus;
+      const dmgBonus =
+        item.system.properties.has('fin') &&
+        actor.system.abilities.dex.mod > actor.system.abilities.str.mod
+          ? actor.system.abilities.dex.mod
+          : damageBonus;
+      damageBonus = dmgBonus > damageBonus ? dmgBonus : damageBonus;
       const isFeat = item.type === 'feat';
       if (damages.length > 0) {
         let dprResult = 0;
@@ -82,10 +94,10 @@ class CrCalculator {
             const diceRegex = /(\d*)[dD](\d*)(([+*-](?:\d+|\@mod|\([a-zA-Z]*\)))*)(\[+-](D\d*))?/gm;
             const dieStr = dam[0].replace(/\s/g, '');
             const damageDice = diceRegex.exec(dieStr);
-            const useDiceMod = damageDice.filter((val) => val === '+@mod').length > 0;
+            const useDiceMod = dieStr.includes('@mod');
             if (damageDice.length > 4) {
-              const diceNum = parseInt(damageDice[1]);
-              const diceValue = parseInt(damageDice[2]);
+              const diceNum = damageDice[1] === '' ? 1 : parseInt(damageDice[1]);
+              const diceValue = damageDice[2] === '' ? 1 : parseInt(damageDice[2]);
               const diceModifier =
                 damageDice[4] && damageDice[4] !== '+@mod' ? parseInt(damageDice[4]) : 0;
               if (diceModifier + attackBonus > attackBonus) {
@@ -123,9 +135,9 @@ class CrCalculator {
         spellCR = chall.cr + legendaryActionsBonus + lairBonus + featsBonus;
       }
     });
-    // console.log(
-    //   `DPR CALCULATION: ${dpr} damage per round\n\tnum attacks: ${numAttacks}\n\tattack bonus: ${attackBonus}\n\tSpell CR: ${spellCR}\n\tAttack CR: ${attackBonusCR}\n\tNumber of Feats: ${numFeats}\n`,
-    // );
+    console.log(
+      `DPR CALCULATION: ${dpr} damage per round\n\tnum attacks: ${numAttacks}\n\tattack bonus: ${attackBonus}\n\tSpell CR: ${spellCR}\n\tAttack CR: ${attackBonusCR}\n\tNumber of Feats: ${numFeats}\n`,
+    );
     return Math.max(attackBonusCR, spellCR);
   }
 
