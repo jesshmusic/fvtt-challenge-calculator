@@ -8,11 +8,13 @@
 <!--- ![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&suffix=%25&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2F<your-module-name>&colorB=4aa94a) -->
 
 
-# How to use this Template to create a versioned Release
+# 5e Challenge Rating Calculator
 ![CRCalc-2](https://github.com/jesshmusic/fvtt-challenge-calculator/assets/7180584/ab0e58fc-05f2-44c8-b0fd-9f21d9901bad)
 
 
 This simple module allows you to make a rough calculation of an NPC's Challenge Rating based on their stats and equipment. Just click the button and it will be updated.
+
+_Note_ this is meant only for DnD 5e
 
 ## Changelog
 
