@@ -46,10 +46,10 @@ class CrCalculator {
     const legendaryActionsBonus = actor.system.resources.legact.value > 0 ? 1 : 0;
     const lairBonus = actor.system.resources.lair.value ? 1 : 0;
     const numFeats = data.items.filter((item) => item.type === 'feat').length;
-    const featsBonus = numFeats > 0 ? numFeats / 2 : 0;
+    const featsBonus = numFeats > 0 ? numFeats / 3 : 0;
     let damageBonus = actor.system.abilities.str.mod;
     let numAttacks = 1;
-    let attackBonus = actor.system.abilities.str.mod + actor.system.attributes.prof;
+    let attackBonus = actor.system.abilities.str.mod;
     const isMulti =
       data.items.filter((item) => {
         if (item.name === 'Multiattack') {
@@ -77,7 +77,7 @@ class CrCalculator {
       const atkBonus =
         item.system.properties.has('fin') &&
         actor.system.abilities.dex.mod > actor.system.abilities.str.mod
-          ? actor.system.abilities.dex.mod + actor.system.attributes.prof
+          ? actor.system.abilities.dex.mod
           : attackBonus;
       attackBonus = atkBonus > attackBonus ? atkBonus : attackBonus;
       const dmgBonus =
@@ -94,6 +94,7 @@ class CrCalculator {
             const diceRegex = /(\d*)[dD](\d*)(([+*-](?:\d+|\@mod|\([a-zA-Z]*\)))*)(\[+-](D\d*))?/gm;
             const dieStr = dam[0].replace(/\s/g, '');
             const damageDice = diceRegex.exec(dieStr);
+            console.log(dieStr, damageDice);
             const useDiceMod = dieStr.includes('@mod');
             if (damageDice.length > 4) {
               const diceNum = damageDice[1] === '' ? 1 : parseInt(damageDice[1]);
@@ -123,21 +124,25 @@ class CrCalculator {
     let spellCR = 0;
     challengeRatings.forEach((chall) => {
       if (dpr >= chall.damage_min && dpr <= chall.damage_max) {
-        const attBonusMod = (attackBonus - chall.attack_bonus) / 2;
+        console.log(attackBonus, chall.prof_bonus, chall.attack_bonus)
+        const attBonusMod = (attackBonus + chall.prof_bonus - chall.attack_bonus) / 2;
         attackBonusCR = chall.cr + attBonusMod + legendaryActionsBonus + lairBonus + featsBonus;
       }
     });
-    challengeRatings.forEach((chall) => {
-      if (
-        actor.system.details.spellLevel >= actor.system.details.cr &&
-        actor.system.attributes.spelldc === chall.save_dc
-      ) {
-        spellCR = chall.cr + legendaryActionsBonus + lairBonus + featsBonus;
-      }
-    });
-    console.log(
-      `DPR CALCULATION: ${dpr} damage per round\n\tnum attacks: ${numAttacks}\n\tattack bonus: ${attackBonus}\n\tSpell CR: ${spellCR}\n\tAttack CR: ${attackBonusCR}\n\tNumber of Feats: ${numFeats}\n`,
-    );
+    if ( actor.system.details.spellLevel / 2 >= attackBonusCR ) {
+      let maxSpellLevel = 0;
+      Object.entries(actor.system.spells).forEach((spellArray) => {
+        const spell = spellArray[1];
+        if ( spell.max > 0 && spell.level > maxSpellLevel ) {
+          maxSpellLevel = spell.level;
+        }
+      })
+      spellCR = (actor.system.details.spellLevel / 2) + maxSpellLevel;
+    }
+
+    // console.log(
+    //   `DPR CALCULATION: ${dpr} damage per round\n\tnum attacks: ${numAttacks}\n\tattack bonus: ${attackBonus}\n\tSpell CR: ${spellCR}\n\tAttack CR: ${attackBonusCR}\n\tNumber of Feats: ${numFeats}\n`,
+    // );
     return Math.max(attackBonusCR, spellCR);
   }
 

@@ -53,3 +53,6 @@ Q.idea/sonarlint/securityhotspotstore/2/5/25e7d167d92ccd64b0634c56d5d2abd71dc637
 Q.idea/sonarlint/securityhotspotstore/2/0/20137a9e94744624390b6748bc96df5ca1579b71,b/d/bd2af7df793354c0f78ae64d1c943ff55f9fd695
 G
 scripts/CrCalculator.js,9/5/9571d08ef8598b5f33dcf84a3108ae70373f2e4b
+:
+
+.gitignore,a/5/a5cc2925ca8258af241be7e5b0381edf30266302
