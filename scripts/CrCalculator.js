@@ -29,121 +29,143 @@ class CrCalculator {
       rawCR = 1;
     }
     const cRating = rawCR > 1 ? Math.round(rawCR) : rawCR;
-    console.log(
-      `OFF CR: ${offensiveCR} - DEF CR: ${defensiveCR} - Raw CR: ${rawCR} - TOTAL CR: ${cRating}`,
-    );
     await actor.update({
       system: {
         details: {
-          cr: cRating,
+          cr: cRating >= 0 ? cRating : 0,
         },
       },
     });
+    ChatMessage.create({
+      user: game.user_id,
+      speaker: ChatMessage.getSpeaker(),
+      blind: true,
+      content: `<h3>Challenge Rating Calculator</h3>
+<p>Challenge rating updated for ${actor.name} to <strong>${cRating}</strong></p>
+<p>Offensive CR: ${offensiveCR}</p>
+<p>Defensive CR: ${defensiveCR}</p>
+<p>Raw CR: ${rawCR}</p>`,
+    });
+
     ui.notifications.info(`CR updated for ${actor.name} to ${cRating}`);
   }
 
   static calculateOffensiveCR(actor, data) {
-    const legendaryActionsBonus = actor.system.resources.legact.value > 0 ? 1 : 0;
-    const lairBonus = actor.system.resources.lair.value ? 1 : 0;
+    let spellSaveDC = 0;
+    if ( actor.system.attributes.spellcasting && actor.system.attributes.spellcasting !== '' ) {
+      const castingAbilityMod = actor.system.abilities[actor.system.attributes.spellcasting].mod;
+      const spellLevelCR = challengeRatings.find((crObj) => {
+        return crObj.cr === actor.system.details.spellLevel;
+      });
+      spellSaveDC = 8 + castingAbilityMod + spellLevelCR.prof_bonus;
+    }
     const numFeats = data.items.filter((item) => item.type === 'feat').length;
+    console.log(data.items.filter((item) => item.type === 'feat'));
     const featsBonus = numFeats > 0 ? numFeats / 3 : 0;
     let damageBonus = actor.system.abilities.str.mod;
     let numAttacks = 1;
     let attackBonus = actor.system.abilities.str.mod;
+    const __ret = this.calculateDamagePerRound( data, numAttacks, actor, attackBonus, damageBonus )
+    numAttacks = __ret.numAttacks
+    attackBonus = __ret.attackBonus
+    const dpr = __ret.dpr
+    let attackBonusCR = 0;
+    let spellCastingCR = 0;
+    challengeRatings.forEach((chall) => {
+      if (dpr >= chall.damage_min && dpr <= chall.damage_max) {
+        const attBonusMod = (attackBonus + chall.prof_bonus - chall.attack_bonus) / 2;
+        attackBonusCR = chall.cr + attBonusMod + featsBonus;
+      }
+      if ( spellSaveDC === chall.save_dc && spellCastingCR === 0 ) {
+        spellCastingCR = chall.cr + featsBonus;
+      }
+    });
+
+    console.log(
+      `DPR CALCULATION: ${dpr} damage per round\n\tnum attacks: ${numAttacks}\n\tattack bonus: ${attackBonus}\n\tAttack CR: ${attackBonusCR}\n\tSpell CR: ${spellCastingCR}\n\tNumber of Feats: ${numFeats}\n`,
+    );
+    return Math.max(attackBonusCR, spellCastingCR)
+  }
+
+  static calculateDamagePerRound( data, numAttacks, actor, attackBonus, damageBonus ) {
     const isMulti =
-      data.items.filter((item) => {
-        if (item.name === 'Multiattack') {
+      data.items.filter( ( item ) => {
+        if ( item.name === 'Multiattack' ) {
           const multiAttackDesc = item.system.description.value
-            .replace('two', '2')
-            .replace('three', '3')
-            .replace('four', '4')
-            .replace('five', '5')
-            .replace('six', '6')
-            .replace('seven', '7')
-            .replace('eight', '8');
+            .replace( 'two', '2' )
+            .replace( 'three', '3' )
+            .replace( 'four', '4' )
+            .replace( 'five', '5' )
+            .replace( 'six', '6' )
+            .replace( 'seven', '7' )
+            .replace( 'eight', '8' );
           const multiRegex = /^[^\d]*(\d+)/g;
-          const result = multiRegex.exec(multiAttackDesc);
-          if (result && result.length > 1 && result[1]) {
-            numAttacks = parseInt(result[1]);
+          const result = multiRegex.exec( multiAttackDesc );
+          if ( result && result.length > 1 && result[1] ) {
+            numAttacks = parseInt( result[1] );
           }
           return true;
         }
         return false;
-      }).length > 0;
+      } ).length > 0;
 
-    const damagesArray = [];
-    data.items.forEach((item) => {
-      const damages = item.system.damage.parts;
+    let damagesArray = [];
+    const offensiveItems = data.items.filter( ( item ) => {
+      return item.system.damage && item.system.damage.parts && item.system.damage.parts.length > 0
+    } );
+    offensiveItems.forEach( ( item ) => {
+      const damages = item.system.damage ? item.system.damage.parts : [];
       const atkBonus =
-        item.system.properties.has('fin') &&
+        item.system.properties.has( 'fin' ) &&
         actor.system.abilities.dex.mod > actor.system.abilities.str.mod
           ? actor.system.abilities.dex.mod
           : attackBonus;
       attackBonus = atkBonus > attackBonus ? atkBonus : attackBonus;
       const dmgBonus =
-        item.system.properties.has('fin') &&
+        item.system.properties.has( 'fin' ) &&
         actor.system.abilities.dex.mod > actor.system.abilities.str.mod
           ? actor.system.abilities.dex.mod
           : damageBonus;
       damageBonus = dmgBonus > damageBonus ? dmgBonus : damageBonus;
       const isFeat = item.type === 'feat';
-      if (damages.length > 0) {
+      if ( damages.length > 0 ) {
         let dprResult = 0;
-        damages.forEach((dam) => {
-          if (dam.length > 0) {
-            const diceRegex = /(\d*)[dD](\d*)(([+*-](?:\d+|\@mod|\([a-zA-Z]*\)))*)(\[+-](D\d*))?/gm;
-            const dieStr = dam[0].replace(/\s/g, '');
-            const damageDice = diceRegex.exec(dieStr);
-            console.log(dieStr, damageDice);
-            const useDiceMod = dieStr.includes('@mod');
-            if (damageDice.length > 4) {
-              const diceNum = damageDice[1] === '' ? 1 : parseInt(damageDice[1]);
-              const diceValue = damageDice[2] === '' ? 1 : parseInt(damageDice[2]);
+        damages.forEach( ( dam ) => {
+          if ( dam.length > 0 ) {
+            const diceRegex = /(\d*)[dD](\d*)(([+*-](?:\d+|\@mod|\([a-zA-Z]*\)))*)(\[+-](\d*))?/gm;
+            const dieStr = dam[0].replace( /\s/g, '' ).replace( /\[.*\]/g, '' );
+            const damageDice = diceRegex.exec( dieStr );
+            const useDiceMod = dieStr.includes( '@mod' );
+            console.log(item.name, dieStr, dam);
+            if ( damageDice.length > 4 ) {
+              const diceNum = damageDice[1] === '' ? 1 : parseInt( damageDice[1] );
+              const diceValue = damageDice[2] === '' ? 1 : parseInt( damageDice[2] );
               const diceModifier =
-                damageDice[4] && damageDice[4] !== '+@mod' ? parseInt(damageDice[4]) : 0;
-              if (diceModifier + attackBonus > attackBonus) {
+                damageDice[4] && damageDice[4] !== '+@mod' ? parseInt( damageDice[4] ) : 0;
+              if ( diceModifier + attackBonus > attackBonus ) {
                 attackBonus = diceModifier + attackBonus;
               }
               const baseDam =
                 isMulti && !isFeat
-                  ? ((diceNum * diceValue) / 2) * numAttacks
-                  : (diceNum * diceValue) / 2;
+                  ? ( ( diceNum * diceValue ) / 2 ) * numAttacks
+                  : ( diceNum * diceValue ) / 2;
               dprResult += baseDam + diceModifier;
-              if (useDiceMod) {
+              if ( useDiceMod ) {
                 dprResult += damageBonus;
               }
             }
           }
-        });
-
-        damagesArray.push(dprResult);
+        } );
+        damagesArray.push( dprResult );
       }
-    });
-    const dpr = damagesArray.reduce((a, b) => a + b) / damagesArray.length;
-    let attackBonusCR = 0;
-    let spellCR = 0;
-    challengeRatings.forEach((chall) => {
-      if (dpr >= chall.damage_min && dpr <= chall.damage_max) {
-        console.log(attackBonus, chall.prof_bonus, chall.attack_bonus)
-        const attBonusMod = (attackBonus + chall.prof_bonus - chall.attack_bonus) / 2;
-        attackBonusCR = chall.cr + attBonusMod + legendaryActionsBonus + lairBonus + featsBonus;
-      }
-    });
-    if ( actor.system.details.spellLevel / 2 >= attackBonusCR ) {
-      let maxSpellLevel = 0;
-      Object.entries(actor.system.spells).forEach((spellArray) => {
-        const spell = spellArray[1];
-        if ( spell.max > 0 && spell.level > maxSpellLevel ) {
-          maxSpellLevel = spell.level;
-        }
-      })
-      spellCR = (actor.system.details.spellLevel / 2) + maxSpellLevel;
+    } );
+    damagesArray = damagesArray.sort( ( a, b ) => b - a );
+    if ( damagesArray.length > 2 ) {
+      damagesArray = damagesArray.slice( 0, 3 );
     }
-
-    // console.log(
-    //   `DPR CALCULATION: ${dpr} damage per round\n\tnum attacks: ${numAttacks}\n\tattack bonus: ${attackBonus}\n\tSpell CR: ${spellCR}\n\tAttack CR: ${attackBonusCR}\n\tNumber of Feats: ${numFeats}\n`,
-    // );
-    return Math.max(attackBonusCR, spellCR);
+    console.log(damagesArray);
+    const dpr = damagesArray.reduce( ( a, b ) => a + b ) / damagesArray.length;
+    return { numAttacks, attackBonus, dpr }
   }
 
   static calculateDefensiveCR(actor, data) {

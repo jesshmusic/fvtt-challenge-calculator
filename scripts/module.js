@@ -13,7 +13,7 @@ Hooks.once('ready', async function () {
 });
 
 Hooks.on('renderActorSheet', (actorSheet, html) => {
-  if (actorSheet.object.type === 'npc') {
+  if (actorSheet.object.type === 'npc' && game.user.isGM) {
     const actorSheetItem = html.find('[class="header-details flexrow"]');
     const tooltip = game.i18n.localize('CR-CALC.button-calc');
     actorSheetItem.append(
