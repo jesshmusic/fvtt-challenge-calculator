@@ -1,6 +1,6 @@
 {
   "name": "fvtt-challenge-calculator",
-  "version": "1.3.1",
+  "version": "1.4.3",
   "main": "index.js",
   "repository": "https://github.com/jesshmusic/fvtt-challenge-calculator.git",
   "author": "Jess Hendricks",
