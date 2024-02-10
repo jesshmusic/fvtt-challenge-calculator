@@ -36,18 +36,10 @@ class CrCalculator {
         },
       },
     });
-    ChatMessage.create({
-      user: game.user_id,
-      speaker: ChatMessage.getSpeaker(),
-      blind: true,
-      content: `<h3>Challenge Rating Calculator</h3>
-<p>Challenge rating updated for ${actor.name} to <strong>${cRating}</strong></p>
-<p>Offensive CR: ${offensiveCR}</p>
-<p>Defensive CR: ${defensiveCR}</p>
-<p>Raw CR: ${rawCR}</p>`,
-    });
-
-    ui.notifications.info(`CR updated for ${actor.name} to ${cRating}`);
+    ui.notifications.info(
+      `CR updated for ${actor.name} to ${cRating}, Offensive CR: ${offensiveCR}, Defensive CR: ${defensiveCR}`,
+      { permanent: true },
+    );
   }
 
   static calculateOffensiveCR(actor, data) {
@@ -114,22 +106,24 @@ class CrCalculator {
       return item.system.damage && item.system.damage.parts && item.system.damage.parts.length > 0;
     });
     offensiveItems.forEach((item) => {
-      const damages = item.system.damage ? item.system.damage.parts : [];
-      const atkBonus =
-        item.system.properties.has('fin') &&
-        actor.system.abilities.dex.mod > actor.system.abilities.str.mod
-          ? actor.system.abilities.dex.mod
-          : attackBonus;
-      attackBonus = atkBonus > attackBonus ? atkBonus : attackBonus;
-      const dmgBonus =
-        item.system.properties.has('fin') &&
-        actor.system.abilities.dex.mod > actor.system.abilities.str.mod
-          ? actor.system.abilities.dex.mod
-          : damageBonus;
-      damageBonus = dmgBonus > damageBonus ? dmgBonus : damageBonus;
-      const isFeat = item.type === 'feat';
-      if (damages.length > 0) {
-        try {
+      try {
+        const damages = item.system.damage ? item.system.damage.parts : [];
+        const atkBonus =
+          item.system.properties &&
+          'fin' in item.system.properties &&
+          actor.system.abilities.dex.mod > actor.system.abilities.str.mod
+            ? actor.system.abilities.dex.mod
+            : attackBonus;
+        attackBonus = atkBonus > attackBonus ? atkBonus : attackBonus;
+        const dmgBonus =
+          item.system.properties &&
+          'fin' in item.system.properties &&
+          actor.system.abilities.dex.mod > actor.system.abilities.str.mod
+            ? actor.system.abilities.dex.mod
+            : damageBonus;
+        damageBonus = dmgBonus > damageBonus ? dmgBonus : damageBonus;
+        const isFeat = item.type === 'feat';
+        if (damages.length > 0) {
           let dprResult = 0;
           damages.forEach((dam) => {
             if (dam.length > 0) {
@@ -158,25 +152,28 @@ class CrCalculator {
             }
           });
           damagesArray.push(dprResult);
-        } catch (e) {
-          console.log(e);
-          ChatMessage.create({
-            user: game.user_id,
-            speaker: ChatMessage.getSpeaker(),
-            blind: true,
-            content: `<h3 style="color: red;">Challenge Rating Calculator - ERROR</h3>
+        }
+      } catch (e) {
+        console.log(e);
+        ChatMessage.create({
+          user: game.user_id,
+          speaker: ChatMessage.getSpeaker(),
+          blind: true,
+          content: `<h3 style="color: red;">Challenge Rating Calculator - ERROR</h3>
                 <h4>Error calculating Item Damage for <strong>"${item.name}"</strong></h4>
                 <p><code>${e}</code></p>
                 <p>Please report errors <a href="https://github.com/jesshmusic/fvtt-challenge-calculator/issues">here</a> with a screenshot of this message. </p>`,
-          });
-        }
+        });
+
+        ui.notifications.error(`Error calculating Item Damage for "${item.name}": ${e}`, {
+          permanent: true,
+        });
       }
     });
     damagesArray = damagesArray.sort((a, b) => b - a);
     if (damagesArray.length > 2) {
       damagesArray = damagesArray.slice(0, 3);
     }
-    console.log(damagesArray);
     const dpr = damagesArray.reduce((a, b) => a + b) / damagesArray.length;
     return { numAttacks, attackBonus, dpr };
   }
