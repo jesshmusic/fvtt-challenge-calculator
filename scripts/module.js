@@ -13,7 +13,12 @@ Hooks.once('ready', async function () {
 });
 
 Hooks.on('renderActorSheet', (actorSheet, html) => {
-  if (actorSheet.object.type === 'npc' && game.user.isGM) {
+  if (
+    actorSheet.object.type === 'npc' &&
+    (actorSheet.object.flags.core.sheetClass === '' ||
+      actorSheet.object.flags.core.sheetClass === 'dnd5e.ActorSheet5eNPC') &&
+    game.user.isGM
+  ) {
     const actorSheetItem = html.find('[class="header-details flexrow"]');
     const tooltip = game.i18n.localize('CR-CALC.button-calc');
     actorSheetItem.append(
@@ -23,9 +28,10 @@ Hooks.on('renderActorSheet', (actorSheet, html) => {
     );
     actorSheet.getData().then((data) => {
       console.log(data.actor);
+      console.log(actorSheet);
     });
 
-    html.on('click', '.cr-calc-button', async (event) => {
+    html.on('click', '.cr-calc-button', async () => {
       CrCalculator.calculateCRForActor(actorSheet);
     });
   }
