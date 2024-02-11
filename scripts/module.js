@@ -1,24 +1,26 @@
 import CrCalculator from './CrCalculator.js';
 
+const shouldShowCRButton = (actorObject) => {
+  if (actorObject.type === 'npc') {
+    if (actorObject.flags.length === 0 && game.user.isGM) {
+      return true;
+    } else if (
+      (actorObject.flags.core.sheetClass === '' ||
+        actorObject.flags.core.sheetClass === 'dnd5e.ActorSheet5eNPC') &&
+      game.user.isGM
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
 Hooks.once('init', async function () {
   console.log('Challenge Rating Calculator Loaded Successfully');
 });
 
-Hooks.once('ready', async function () {
-  // ChatMessage.create({
-  //   user: game.user_id,
-  //   speaker: ChatMessage.getSpeaker(),
-  //   content: '<h3>Challenge Rating Calculator</h3><p>Loaded Successfully</p>',
-  // });
-});
-
 Hooks.on('renderActorSheet', (actorSheet, html) => {
-  if (
-    actorSheet.object.type === 'npc' &&
-    (actorSheet.object.flags.core.sheetClass === '' ||
-      actorSheet.object.flags.core.sheetClass === 'dnd5e.ActorSheet5eNPC') &&
-    game.user.isGM
-  ) {
+  if (shouldShowCRButton(actorSheet.object)) {
     const actorSheetItem = html.find('[class="header-details flexrow"]');
     const tooltip = game.i18n.localize('CR-CALC.button-calc');
     actorSheetItem.append(
