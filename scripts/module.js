@@ -1,11 +1,13 @@
 import CrCalculator from './CrCalculator.js';
 
 const shouldShowCRButton = (actorObject) => {
+  // console.info('cr-calc ActorObject', actorObject, game.user);
   if (actorObject.type === 'npc') {
-    if (actorObject.flags.length === 0 && game.user.isGM) {
+    if (actorObject.flags.length === 0 && (game.user.isGM || game.user.isTheGM)) {
       return true;
     } else if (
-      (actorObject.flags.core.sheetClass === '' ||
+      (!actorObject.flags.sheetClass ||
+        actorObject.flags.core.sheetClass === '' ||
         actorObject.flags.core.sheetClass === 'dnd5e.ActorSheet5eNPC') &&
       game.user.isGM
     ) {
@@ -20,6 +22,7 @@ Hooks.once('init', async function () {
 });
 
 Hooks.on('renderActorSheet', (actorSheet, html) => {
+  // console.log('cr-calc renderActorSheet', shouldShowCRButton(actorSheet.object));
   if (shouldShowCRButton(actorSheet.object)) {
     const actorSheetItem = html.find('[class="header-details flexrow"]');
     const tooltip = game.i18n.localize('CR-CALC.button-calc');

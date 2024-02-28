@@ -1,7 +1,7 @@
 {
   "id": "fvtt-challenge-calculator",
   "title": "Challenge Rating Calculator",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "compatibility": {
     "minimum": "11",
     "verified": "11",
