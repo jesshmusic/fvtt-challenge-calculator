@@ -38,7 +38,7 @@ class CrCalculator {
     });
     ui.notifications.info(
       `CR updated for ${actor.name} to ${cRating}, Offensive CR: ${offensiveCR}, Defensive CR: ${defensiveCR}`,
-      { permanent: true },
+      { permanent: false },
     );
   }
 
