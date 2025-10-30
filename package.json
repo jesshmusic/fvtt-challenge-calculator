@@ -1,6 +1,6 @@
 {
   "name": "fvtt-challenge-calculator",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Dorman Lakely's 5e CR Calculator for FoundryVTT",
   "main": "scripts/main.js",
   "scripts": {
@@ -11,9 +11,9 @@
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"**/*.json\" \"**/*.md\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"**/*.json\" \"**/*.md\"",
-    "release:patch": "node scripts/release.js patch",
-    "release:minor": "node scripts/release.js minor",
-    "release:major": "node scripts/release.js major"
+    "release:patch": "node .github/scripts/release.js patch",
+    "release:minor": "node .github/scripts/release.js minor",
+    "release:major": "node .github/scripts/release.js major"
   },
   "repository": "https://github.com/jesshmusic/fvtt-challenge-calculator.git",
   "author": "Jess Hendricks",
