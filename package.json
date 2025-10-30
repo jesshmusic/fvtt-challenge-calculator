@@ -10,7 +10,10 @@
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"**/*.json\" \"**/*.md\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"**/*.json\" \"**/*.md\""
+    "format:check": "prettier --check \"src/**/*.ts\" \"**/*.json\" \"**/*.md\"",
+    "release:patch": "node scripts/release.js patch",
+    "release:minor": "node scripts/release.js minor",
+    "release:major": "node scripts/release.js major"
   },
   "repository": "https://github.com/jesshmusic/fvtt-challenge-calculator.git",
   "author": "Jess Hendricks",
