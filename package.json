@@ -1,11 +1,39 @@
 {
   "name": "fvtt-challenge-calculator",
-  "version": "1.4.6",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Dorman Lakely's 5e CR Calculator for FoundryVTT",
+  "main": "scripts/main.js",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "clean": "rimraf scripts/*",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"**/*.json\" \"**/*.md\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"**/*.json\" \"**/*.md\""
+  },
   "repository": "https://github.com/jesshmusic/fvtt-challenge-calculator.git",
   "author": "Jess Hendricks",
   "license": "MIT",
-  "dependencies": {
-    "prettier": "^3.2.4"
-  }
+  "devDependencies": {
+    "@league-of-foundry-developers/foundry-vtt-types": "^12.331.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^7.1.7",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "keywords": [
+    "foundry-vtt",
+    "module",
+    "cr-calculator",
+    "dnd5e",
+    "typescript"
+  ]
 }

@@ -1,4 +1,21 @@
-export const challengeRatings = [
+/**
+ * Challenge Rating data structures and tables from the D&D 5e Dungeon Master's Guide
+ */
+
+export interface ChallengeRating {
+  cr: number;
+  xp: number;
+  prof_bonus: number;
+  armor_class: number;
+  hit_points_min: number;
+  hit_points_max: number;
+  attack_bonus: number;
+  damage_min: number;
+  damage_max: number;
+  save_dc: number;
+}
+
+export const challengeRatings: ChallengeRating[] = [
   {
     cr: 0,
     xp: 10,
@@ -409,7 +426,11 @@ export const challengeRatings = [
   },
 ];
 
-export const monsterFeatures = [
+/**
+ * Special monster features that provide defensive bonuses
+ * Based on DMG Chapter 9: Creating a Monster
+ */
+export const monsterFeatures: string[] = [
   'Aggressive',
   'Ambusher',
   'Angelic Weapons',

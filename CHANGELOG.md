@@ -1,0 +1,79 @@
+# Changelog
+
+All notable changes to Dorman Lakely's 5e CR Calculator will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.0] - 2024-10-30
+
+### Major Update - TypeScript Rewrite
+
+**BREAKING CHANGES:**
+
+- Now requires Foundry VTT v13 or higher (dropped support for v11-12)
+
+### Added
+
+- Complete TypeScript rewrite for better type safety and maintainability
+- ApplicationV2 dialog showing detailed calculation breakdown
+- Separate display of defensive and offensive CR calculations
+- Visual breakdown showing:
+  - HP, AC, immunities, resistances, vulnerabilities
+  - Detected monster features with names
+  - Damage per round, attack bonus, number of attacks
+  - Detected weapons and attacks
+  - Spell save DC for casters
+- Modern UI styling matching dnd5e2 sheets
+- Comprehensive build system with Vite
+- ESLint and Prettier for code quality
+- Option to review before applying calculated CR
+
+### Changed
+
+- Renamed module to "Dorman Lakely's 5e CR Calculator"
+- CR calculation no longer auto-applies (shows dialog first)
+- Improved error handling with detailed error messages
+- Better damage parsing logic
+- Updated to work with Foundry v13 NPC sheets
+
+### Removed
+
+- jQuery dependency (now uses vanilla JavaScript)
+- Automatic CR application (now requires user confirmation)
+- Support for Foundry VTT v11-12
+- Empty lib.js file
+
+### Fixed
+
+- Better handling of edge cases in damage parsing
+- Improved multiattack detection
+- More accurate finesse weapon detection
+- Fixed issues with spell save DC calculation
+
+## [1.5.0] - 2023-XX-XX
+
+### Added
+
+- Basic CR calculation functionality
+- Automatic application to actor
+- Simple notification-based results
+
+### Changed
+
+- Support for Foundry VTT v11-12
+
+## [1.0.2] - 2023-XX-XX
+
+### Added
+
+- Initial release
+- Basic CR calculation based on DMG guidelines
+- Button on NPC sheets
+- Auto-updates actor CR field
+
+---
+
+[2.0.0]: https://github.com/jesshmusic/fvtt-challenge-calculator/compare/v1.5.0...v2.0.0
+[1.5.0]: https://github.com/jesshmusic/fvtt-challenge-calculator/compare/v1.0.2...v1.5.0
+[1.0.2]: https://github.com/jesshmusic/fvtt-challenge-calculator/releases/tag/v1.0.2

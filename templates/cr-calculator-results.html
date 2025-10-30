@@ -1,0 +1,131 @@
+<div class="cr-calculator-results">
+  <!-- Header -->
+  <header class="cr-header">
+    <h2>{{actorName}}</h2>
+    <div class="cr-comparison">
+      <div class="cr-value">
+        <label>Original CR</label>
+        <span class="cr-number">{{originalCR}}</span>
+      </div>
+      <div class="cr-arrow">
+        {{#if crChanged}}
+          {{#if crIncrease}}
+            <i class="fas fa-arrow-up cr-increase"></i>
+          {{else}}
+            <i class="fas fa-arrow-down cr-decrease"></i>
+          {{/if}}
+        {{else}}
+          <i class="fas fa-equals"></i>
+        {{/if}}
+      </div>
+      <div class="cr-value">
+        <label>Calculated CR</label>
+        <span class="cr-number calculated">{{calculatedCR}}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CR Breakdown -->
+  <section class="cr-breakdown">
+    <div class="breakdown-row">
+      <div class="breakdown-item defensive">
+        <i class="fas fa-shield-alt"></i>
+        <span class="label">Defensive CR</span>
+        <span class="value">{{defensiveCR}}</span>
+      </div>
+      <div class="breakdown-item offensive">
+        <i class="fas fa-sword"></i>
+        <span class="label">Offensive CR</span>
+        <span class="value">{{offensiveCR}}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Defensive Details -->
+  <section class="details-section">
+    <h3><i class="fas fa-shield-alt"></i> Defensive Breakdown</h3>
+    <div class="details-grid">
+      <div class="detail-item">
+        <label>Hit Points</label>
+        <span>{{defensive.hp}}</span>
+      </div>
+      <div class="detail-item">
+        <label>Armor Class</label>
+        <span>{{defensive.ac}}</span>
+      </div>
+      <div class="detail-item">
+        <label>Immunities</label>
+        <span>{{defensive.immunities}}</span>
+      </div>
+      <div class="detail-item">
+        <label>Resistances</label>
+        <span>{{defensive.resistances}}</span>
+      </div>
+      <div class="detail-item">
+        <label>Vulnerabilities</label>
+        <span>{{defensive.vulnerabilities}}</span>
+      </div>
+    </div>
+
+    {{#if defensive.hasFeatures}}
+      <div class="feature-list">
+        <label>Detected Monster Features:</label>
+        <ul>
+          {{#each defensive.monsterFeatures}}
+            <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+  </section>
+
+  <!-- Offensive Details -->
+  <section class="details-section">
+    <h3><i class="fas fa-sword"></i> Offensive Breakdown</h3>
+    <div class="details-grid">
+      <div class="detail-item">
+        <label>Damage Per Round</label>
+        <span>{{offensive.dpr}}</span>
+      </div>
+      <div class="detail-item">
+        <label>Number of Attacks</label>
+        <span>{{offensive.numAttacks}}</span>
+      </div>
+      <div class="detail-item">
+        <label>Attack Bonus</label>
+        <span>{{offensive.attackBonus}}</span>
+      </div>
+      {{#if offensive.hasSpells}}
+        <div class="detail-item">
+          <label>Spell Save DC</label>
+          <span>{{offensive.spellSaveDC}}</span>
+        </div>
+      {{/if}}
+      <div class="detail-item">
+        <label>Number of Feats</label>
+        <span>{{offensive.numFeats}}</span>
+      </div>
+    </div>
+
+    {{#if offensive.hasWeapons}}
+      <div class="feature-list">
+        <label>Detected Weapons/Attacks:</label>
+        <ul>
+          {{#each offensive.detectedWeapons}}
+            <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+  </section>
+
+  <!-- Actions -->
+  <footer class="form-footer flexrow">
+    <button type="button" data-action="apply" class="bright">
+      <i class="fas fa-check"></i> Apply CR ({{calculatedCR}})
+    </button>
+    <button type="button" data-action="close">
+      <i class="fas fa-times"></i> Cancel
+    </button>
+  </footer>
+</div>
