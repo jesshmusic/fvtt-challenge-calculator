@@ -140,5 +140,5 @@ jobs:
           timeout: 60000
           url: "https://api.foundryvtt.com/_api/packages/release_version/"
           method: "POST"
-          customHeaders: '{"Content-Type": "application/json", "Authorization":"${{secrets.FOUNDRY_PACKAGE_RELEASE_TOKEN}}"}'
+          customHeaders: '{"Content-Type": "application/json", "Authorization":"${{secrets.FOUNDRY_PACKAGE_TOKEN}}"}'
           data: '{"id": "fvtt-challenge-calculator", "release": { "version": "${{github.event.release.tag_name}}", "manifest": "https://github.com/jesshmusic/fvtt-challenge-calculator/releases/download/${{github.event.release.tag_name}}/module.json", "notes": "https://github.com/jesshmusic/fvtt-challenge-calculator", "compatibility": {"minimum": "13","verified": "13"}}}'
