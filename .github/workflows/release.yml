@@ -68,24 +68,28 @@ jobs:
           prerelease: false
 
       - name: Notify FoundryVTT Package Release API
+        env:
+          FOUNDRY_TOKEN: ${{ secrets.FOUNDRY_PACKAGE_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          REPO: ${{ github.repository }}
         run: |
           RESPONSE=$(curl -X POST https://foundryvtt.com/_api/packages/release_version/ \
             -w "\n%{http_code}" \
             -H "Content-Type: application/json" \
-            -H "Authorization: ${{ secrets.FOUNDRY_PACKAGE_TOKEN }}" \
-            -d '{
-              "id": "fvtt-challenge-calculator",
-              "dry-run": false,
-              "release": {
-                "version": "${{ steps.version.outputs.version }}",
-                "manifest": "https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/module.json",
-                "notes": "https://github.com/${{ github.repository }}/releases/tag/v${{ steps.version.outputs.version }}",
-                "compatibility": {
-                  "minimum": "13",
-                  "verified": "13"
+            -H "Authorization: ${FOUNDRY_TOKEN}" \
+            -d "{
+              \"id\": \"fvtt-challenge-calculator\",
+              \"dry-run\": false,
+              \"release\": {
+                \"version\": \"${VERSION}\",
+                \"manifest\": \"https://github.com/${REPO}/releases/download/v${VERSION}/module.json\",
+                \"notes\": \"https://github.com/${REPO}/releases/tag/v${VERSION}\",
+                \"compatibility\": {
+                  \"minimum\": \"13\",
+                  \"verified\": \"13\"
                 }
               }
-            }')
+            }")
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | sed '$d')
