@@ -908,7 +908,10 @@ class CRCalculatorService {
           damages.push([item.system.damage.base.formula, item.system.damage.base.types?.[0] || ""]);
         }
         if (item.system.damage.versatile && item.system.damage.versatile.formula) {
-          damages.push([item.system.damage.versatile.formula, item.system.damage.versatile.types?.[0] || ""]);
+          damages.push([
+            item.system.damage.versatile.formula,
+            item.system.damage.versatile.types?.[0] || ""
+          ]);
         }
         const hasFinesseProperty = item.system.properties instanceof Set ? item.system.properties.has("fin") : "fin" in (item.system.properties || {});
         const atkBonus = hasFinesseProperty && actor.system.abilities.dex.mod > actor.system.abilities.str.mod ? actor.system.abilities.dex.mod : attackBonus;
@@ -971,13 +974,16 @@ class CRCalculatorService {
     const resistBonus = actor.system.traits.dr.value.size;
     const vulnPenalty = -1 * actor.system.traits.dv.value.size;
     const detectedMonsterFeatures = data.items.filter((item) => monsterFeatures[item.name]).map((item) => item.name);
-    const monsterFeatureWeight = detectedMonsterFeatures.reduce((total, featureName) => {
-      const feature = monsterFeatures[featureName];
-      if (feature && (feature.type === "defensive" || feature.type === "utility" || feature.type === "legendary")) {
-        return total + feature.weight;
-      }
-      return total;
-    }, 0);
+    const monsterFeatureWeight = detectedMonsterFeatures.reduce(
+      (total, featureName) => {
+        const feature = monsterFeatures[featureName];
+        if (feature && (feature.type === "defensive" || feature.type === "utility" || feature.type === "legendary")) {
+          return total + feature.weight;
+        }
+        return total;
+      },
+      0
+    );
     const monsterFeatureBonus = monsterFeatureWeight / 4;
     const ac = actor.system.attributes.ac.value;
     const hp = actor.system.attributes.hp.max;
@@ -1108,7 +1114,7 @@ class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     this.close();
   }
 }
-const version = "2.3.1";
+const version = "2.3.2";
 const packageInfo = {
   version
 };
