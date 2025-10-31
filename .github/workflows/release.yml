@@ -81,7 +81,7 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Authorization: ${{ secrets.FOUNDRY_PACKAGE_TOKEN }}" \
             -d '{
-              "id": "em-tile-utilities",
+              "id": "fvtt-challenge-calculator",
               "dry-run": false,
               "release": {
                 "version": "${{ steps.version.outputs.version }}",
