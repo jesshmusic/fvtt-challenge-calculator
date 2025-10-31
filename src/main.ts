@@ -83,7 +83,7 @@ Hooks.once('ready', async function () {
     };
 
     console.log(
-      "%c⚔️ CR Calculator API %cexposed for external modules",
+      '%c⚔️ CR Calculator API %cexposed for external modules',
       'color: #d32f2f; font-weight: bold; font-size: 14px;',
       'color: #2196f3; font-weight: normal; font-size: 12px;',
     );

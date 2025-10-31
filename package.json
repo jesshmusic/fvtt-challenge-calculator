@@ -1,6 +1,6 @@
 {
   "name": "fvtt-challenge-calculator",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "Dorman Lakely's 5e CR Calculator for FoundryVTT",
   "main": "scripts/main.js",
   "scripts": {
