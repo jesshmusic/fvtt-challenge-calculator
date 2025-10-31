@@ -1114,11 +1114,11 @@ class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     this.close();
   }
 }
-const version = "2.3.3";
+const version = "2.4.1";
 const packageInfo = {
   version
 };
-const buildNumber = 6;
+const buildNumber = 7;
 const buildInfo = {
   buildNumber
 };
