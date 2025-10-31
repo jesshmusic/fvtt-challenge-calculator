@@ -473,7 +473,7 @@ class CRCalculatorService {
           }
         }
       });
-      ui.notifications.info(
+      ui.notifications?.info(
         `CR updated for ${actor.name} to ${finalCR}, Offensive CR: ${offensiveResult.cr}, Defensive CR: ${defensiveResult.cr}`,
         { permanent: false }
       );
@@ -608,15 +608,14 @@ class CRCalculatorService {
       } catch (e) {
         console.error(e);
         ChatMessage.create({
-          user: game.user?.id,
           speaker: ChatMessage.getSpeaker(),
-          blind: true,
           content: `<h3 style="color: red;">Challenge Rating Calculator - ERROR</h3>
                 <h4>Error calculating Item Damage for <strong>"${item.name}"</strong></h4>
                 <p><code>${e}</code></p>
-                <p>Please report errors <a href="https://github.com/jesshmusic/fvtt-challenge-calculator/issues">here</a> with a screenshot of this message. </p>`
+                <p>Please report errors <a href="https://github.com/jesshmusic/fvtt-challenge-calculator/issues">here</a> with a screenshot of this message. </p>`,
+          whisper: [game.user?.id].filter(Boolean)
         });
-        ui.notifications.error(`Error calculating Item Damage for "${item.name}": ${e}`, {
+        ui.notifications?.error(`Error calculating Item Damage for "${item.name}": ${e}`, {
           permanent: true
         });
       }
@@ -753,7 +752,7 @@ class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         }
       }
     });
-    ui.notifications.info(
+    ui.notifications?.info(
       `CR updated for ${this.result.actorName} to ${this.result.calculatedCR}`,
       { permanent: false }
     );
@@ -770,7 +769,7 @@ const version = "2.1.0";
 const packageInfo = {
   version
 };
-const buildNumber = 2;
+const buildNumber = 3;
 const buildInfo = {
   buildNumber
 };
@@ -832,7 +831,7 @@ hookNames.forEach((hookName) => {
     if (headerDetails.querySelector(".cr-calc-button")) {
       return;
     }
-    const tooltip = game.i18n.localize("CR-CALC.button-calc");
+    const tooltip = game.i18n?.localize("CR-CALC.button-calc") || "Calculate CR";
     const button = document.createElement("button");
     button.type = "button";
     button.className = "cr-calc-button";
@@ -847,7 +846,7 @@ hookNames.forEach((hookName) => {
         dialog.render(true);
       } catch (error) {
         console.error("CR Calculator: Error calculating CR", error);
-        ui.notifications.error(
+        ui.notifications?.error(
           `Error calculating CR: ${error instanceof Error ? error.message : "Unknown error"}`,
           { permanent: true }
         );

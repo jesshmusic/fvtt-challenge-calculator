@@ -111,7 +111,7 @@ export class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2
       },
     });
 
-    ui.notifications.info(
+    ui.notifications?.info(
       `CR updated for ${this.result.actorName} to ${this.result.calculatedCR}`,
       { permanent: false },
     );

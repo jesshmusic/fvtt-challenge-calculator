@@ -100,7 +100,7 @@ hookNames.forEach(hookName => {
     }
 
     // Get localized tooltip text
-    const tooltip = game.i18n.localize('CR-CALC.button-calc');
+    const tooltip = game.i18n?.localize('CR-CALC.button-calc') || 'Calculate CR';
 
     // Create button element
     const button = document.createElement('button');
@@ -123,7 +123,7 @@ hookNames.forEach(hookName => {
         dialog.render(true);
       } catch (error) {
         console.error('CR Calculator: Error calculating CR', error);
-        ui.notifications.error(
+        ui.notifications?.error(
           `Error calculating CR: ${error instanceof Error ? error.message : 'Unknown error'}`,
           { permanent: true }
         );

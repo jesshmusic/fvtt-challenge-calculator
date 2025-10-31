@@ -87,7 +87,7 @@ export class CRCalculatorService {
         },
       });
 
-      ui.notifications.info(
+      ui.notifications?.info(
         `CR updated for ${actor.name} to ${finalCR}, Offensive CR: ${offensiveResult.cr}, Defensive CR: ${defensiveResult.cr}`,
         { permanent: false },
       );
@@ -294,16 +294,15 @@ export class CRCalculatorService {
       } catch (e) {
         console.error(e);
         ChatMessage.create({
-          user: game.user?.id,
           speaker: ChatMessage.getSpeaker(),
-          blind: true,
           content: `<h3 style="color: red;">Challenge Rating Calculator - ERROR</h3>
                 <h4>Error calculating Item Damage for <strong>"${item.name}"</strong></h4>
                 <p><code>${e}</code></p>
                 <p>Please report errors <a href="https://github.com/jesshmusic/fvtt-challenge-calculator/issues">here</a> with a screenshot of this message. </p>`,
-        });
+          whisper: [game.user?.id].filter(Boolean) as string[],
+        } as any);
 
-        ui.notifications.error(`Error calculating Item Damage for "${item.name}": ${e}`, {
+        ui.notifications?.error(`Error calculating Item Damage for "${item.name}": ${e}`, {
           permanent: true,
         });
       }
