@@ -27,14 +27,6 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Manual release for version: $VERSION"
 
-      - name: Check if tag already exists
-        run: |
-          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "::error::Tag v${{ steps.version.outputs.version }} already exists!"
-            echo "::error::If you want to create a new release, bump the version first by running 'npm run release:patch/minor/major' locally and creating a PR."
-            exit 1
-          fi
-
       - name: Install dependencies
         run: npm ci
 
@@ -77,7 +69,8 @@ jobs:
 
       - name: Notify FoundryVTT Package Release API
         run: |
-          curl -X POST https://foundryvtt.com/_api/packages/release_version/ \
+          RESPONSE=$(curl -X POST https://foundryvtt.com/_api/packages/release_version/ \
+            -w "\n%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Authorization: ${{ secrets.FOUNDRY_PACKAGE_TOKEN }}" \
             -d '{
@@ -92,4 +85,17 @@ jobs:
                   "verified": "13"
                 }
               }
-            }'
+            }')
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Response: $BODY"
+          echo "HTTP Code: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "::error::Failed to notify Foundry API. HTTP $HTTP_CODE: $BODY"
+            exit 1
+          fi
+
+          echo "Successfully notified Foundry Package API"
