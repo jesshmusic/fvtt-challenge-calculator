@@ -1,5 +1,6 @@
 import { CRCalculatorService } from './services/CRCalculatorService.js';
 import { CRCalculatorDialog } from './ui/CRCalculatorDialog.js';
+import { challengeRatings, monsterFeatures } from './data/crData.js';
 import packageInfo from '../package.json';
 import buildInfo from '../build-info.json';
 
@@ -49,6 +50,44 @@ Hooks.once('ready', async function () {
     'color: #d32f2f; font-weight: bold; font-size: 16px;',
     'color: #4caf50; font-weight: bold; font-size: 14px;',
   );
+
+  // Expose public API for other modules
+  const module = game.modules?.get('fvtt-challenge-calculator');
+  if (module) {
+    module.api = {
+      /**
+       * Calculate CR for an actor
+       * @param {Actor} actor - The actor to calculate CR for
+       * @param {boolean} updateActor - Whether to update the actor's CR field
+       * @returns {Promise<CRCalculationResult>} The calculation result
+       */
+      calculateCRForActor: CRCalculatorService.calculateCRForActor.bind(CRCalculatorService),
+
+      /**
+       * Array of challenge rating data from DMG
+       * @type {ChallengeRating[]}
+       */
+      challengeRatings,
+
+      /**
+       * Dictionary of monster features with CR weights
+       * @type {Record<string, MonsterFeature>}
+       */
+      monsterFeatures,
+
+      /**
+       * Get monster feature names as an array
+       * @returns {string[]} Array of feature names
+       */
+      monsterFeatureNames: Object.keys(monsterFeatures),
+    };
+
+    console.log(
+      "%c⚔️ CR Calculator API %cexposed for external modules",
+      'color: #d32f2f; font-weight: bold; font-size: 14px;',
+      'color: #2196f3; font-weight: normal; font-size: 12px;',
+    );
+  }
 });
 
 /**
