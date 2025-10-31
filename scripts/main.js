@@ -408,33 +408,369 @@ const challengeRatings = [
     save_dc: 23
   }
 ];
-const monsterFeatures = [
-  "Aggressive",
-  "Ambusher",
-  "Angelic Weapons",
-  "Avoidance",
-  "Blood Frenzy",
-  "Constrict",
-  "Damage Transfer",
-  "Enlarge",
-  "Frightful Presence",
-  "Heated Body",
-  "Horrifying Visage",
-  "Legendary Resistance",
-  "Magic Resistance",
-  "Martial Advantage",
-  "Nimble Escape",
-  "Pack Tactics",
-  "Parry",
-  "Possession",
-  "Regeneration",
-  "Relentless",
-  "Shadow Stealth",
-  "Stench",
-  "Superior Invisibility",
-  "Undead Fortitude",
-  "Web"
-];
+const monsterFeatures = {
+  // ===== LEGENDARY / MAJOR DEFENSIVE FEATURES (3-4 weight) =====
+  "Legendary Resistance": {
+    name: "Legendary Resistance",
+    weight: 3,
+    type: "legendary",
+    description: "3/day: +10 HP (CR 1-4), +20 HP (CR 5-10), +30 HP (CR 11+)"
+  },
+  "Damage Transfer": {
+    name: "Damage Transfer",
+    weight: 3,
+    type: "defensive",
+    description: "Transfers damage to another creature, effectively ~2/3 normal HP"
+  },
+  Possession: {
+    name: "Possession",
+    weight: 4,
+    type: "defensive",
+    description: "Can possess other creatures, extremely difficult to kill"
+  },
+  Rejuvenation: {
+    name: "Rejuvenation",
+    weight: 4,
+    type: "defensive",
+    description: "Returns to life after being destroyed unless special condition met"
+  },
+  // ===== STRONG DEFENSIVE FEATURES (2 weight) =====
+  "Magic Resistance": {
+    name: "Magic Resistance",
+    weight: 2,
+    type: "defensive",
+    description: "Advantage on saves vs spells, effective +2 AC"
+  },
+  Regeneration: {
+    name: "Regeneration",
+    weight: 2,
+    type: "defensive",
+    description: "Regains HP each round, effective +3x HP per round healed"
+  },
+  "Superior Invisibility": {
+    name: "Superior Invisibility",
+    weight: 2,
+    type: "defensive",
+    description: "Attacks have disadvantage, effective +2 AC"
+  },
+  Avoidance: {
+    name: "Avoidance",
+    weight: 2,
+    type: "defensive",
+    description: "Takes half damage from effects that allow saves"
+  },
+  Incorporeal: {
+    name: "Incorporeal Movement",
+    weight: 2,
+    type: "defensive",
+    description: "Can move through creatures and objects, resistant to nonmagical damage"
+  },
+  "Reflective Carapace": {
+    name: "Reflective Carapace",
+    weight: 2,
+    type: "defensive",
+    description: "Reflects ranged spell attacks back at caster"
+  },
+  "Spell Turning": {
+    name: "Spell Turning",
+    weight: 2,
+    type: "defensive",
+    description: "Has advantage on saves and reflects spells"
+  },
+  // ===== MODERATE DEFENSIVE FEATURES (1 weight) =====
+  "Undead Fortitude": {
+    name: "Undead Fortitude",
+    weight: 1,
+    type: "defensive",
+    description: "Can survive lethal damage with successful save"
+  },
+  Parry: {
+    name: "Parry",
+    weight: 1,
+    type: "defensive",
+    description: "Reaction to increase AC against one attack"
+  },
+  "Shield Block": {
+    name: "Shield Block",
+    weight: 1,
+    type: "defensive",
+    description: "Reaction to add AC bonus"
+  },
+  Evasion: {
+    name: "Evasion",
+    weight: 1,
+    type: "defensive",
+    description: "Takes no damage on successful Dex save instead of half"
+  },
+  "Defensive Duelist": {
+    name: "Defensive Duelist",
+    weight: 1,
+    type: "defensive",
+    description: "Add proficiency bonus to AC as reaction"
+  },
+  "Damage Absorption": {
+    name: "Damage Absorption",
+    weight: 1,
+    type: "defensive",
+    description: "Heals from specific damage type instead of taking damage"
+  },
+  "Reactive Armor": {
+    name: "Reactive Armor",
+    weight: 1,
+    type: "defensive",
+    description: "Retaliates when hit"
+  },
+  // ===== OFFENSIVE FEATURES (1-2 weight) =====
+  "Pack Tactics": {
+    name: "Pack Tactics",
+    weight: 1,
+    type: "offensive",
+    description: "Advantage on attacks when ally is near, effective +1 attack bonus"
+  },
+  "Blood Frenzy": {
+    name: "Blood Frenzy",
+    weight: 1,
+    type: "offensive",
+    description: "Advantage on attacks against wounded creatures"
+  },
+  "Martial Advantage": {
+    name: "Martial Advantage",
+    weight: 1,
+    type: "offensive",
+    description: "Extra damage once per turn when ally is nearby"
+  },
+  Pounce: {
+    name: "Pounce",
+    weight: 1,
+    type: "offensive",
+    description: "Knock prone and bonus attack after charge"
+  },
+  Charge: {
+    name: "Charge",
+    weight: 1,
+    type: "offensive",
+    description: "Extra damage when moving before attack"
+  },
+  Flyby: {
+    name: "Flyby",
+    weight: 1,
+    type: "offensive",
+    description: "Doesn't provoke opportunity attacks when flying"
+  },
+  Ambusher: {
+    name: "Ambusher",
+    weight: 1,
+    type: "offensive",
+    description: "Advantage on first round, surprise bonus"
+  },
+  Assassinate: {
+    name: "Assassinate",
+    weight: 2,
+    type: "offensive",
+    description: "Automatic critical on surprised creatures"
+  },
+  Rampage: {
+    name: "Rampage",
+    weight: 1,
+    type: "offensive",
+    description: "Bonus action attack after reducing creature to 0 HP"
+  },
+  Reckless: {
+    name: "Reckless",
+    weight: 1,
+    type: "offensive",
+    description: "Advantage on attacks but attacks against have advantage"
+  },
+  "Death Burst": {
+    name: "Death Burst",
+    weight: 1,
+    type: "offensive",
+    description: "Damages nearby creatures on death"
+  },
+  // ===== UTILITY / MOBILITY FEATURES (0-1 weight) =====
+  "Nimble Escape": {
+    name: "Nimble Escape",
+    weight: 1,
+    type: "utility",
+    description: "Can Disengage or Hide as bonus action"
+  },
+  "Shadow Stealth": {
+    name: "Shadow Stealth",
+    weight: 1,
+    type: "utility",
+    description: "Can hide in dim light or darkness as bonus action"
+  },
+  Aggressive: {
+    name: "Aggressive",
+    weight: 1,
+    type: "utility",
+    description: "Bonus action to move toward enemy"
+  },
+  "Keen Senses": {
+    name: "Keen Senses",
+    weight: 0,
+    type: "utility",
+    description: "Advantage on Perception checks"
+  },
+  "Spider Climb": {
+    name: "Spider Climb",
+    weight: 0,
+    type: "utility",
+    description: "Can climb difficult surfaces without checks"
+  },
+  "Web Sense": {
+    name: "Web Sense",
+    weight: 0,
+    type: "utility",
+    description: "Knows location of creatures in contact with web"
+  },
+  "Web Walker": {
+    name: "Web Walker",
+    weight: 0,
+    type: "utility",
+    description: "Ignores movement restrictions from webbing"
+  },
+  Amphibious: {
+    name: "Amphibious",
+    weight: 0,
+    type: "utility",
+    description: "Can breathe air and water"
+  },
+  Tunneler: {
+    name: "Tunneler",
+    weight: 0,
+    type: "utility",
+    description: "Can burrow through solid rock"
+  },
+  "False Appearance": {
+    name: "False Appearance",
+    weight: 0,
+    type: "utility",
+    description: "Indistinguishable from normal object when motionless"
+  },
+  // ===== SITUATIONAL / CONDITIONAL FEATURES (0-1 weight) =====
+  "Frightful Presence": {
+    name: "Frightful Presence",
+    weight: 1,
+    type: "utility",
+    description: "Can frighten nearby creatures"
+  },
+  "Horrifying Visage": {
+    name: "Horrifying Visage",
+    weight: 1,
+    type: "utility",
+    description: "Can frighten and age creatures that see it"
+  },
+  Stench: {
+    name: "Stench",
+    weight: 1,
+    type: "utility",
+    description: "Nearby creatures must save or be poisoned"
+  },
+  "Sunlight Sensitivity": {
+    name: "Sunlight Sensitivity",
+    weight: -1,
+    type: "utility",
+    description: "Disadvantage in sunlight (negative weight)"
+  },
+  "Light Sensitivity": {
+    name: "Light Sensitivity",
+    weight: -1,
+    type: "utility",
+    description: "Disadvantage in bright light (negative weight)"
+  },
+  Web: {
+    name: "Web",
+    weight: 1,
+    type: "utility",
+    description: "Can restrain creatures with webbing"
+  },
+  "Hold Breath": {
+    name: "Hold Breath",
+    weight: 0,
+    type: "utility",
+    description: "Can hold breath for extended period"
+  },
+  "Turn Resistance": {
+    name: "Turn Resistance",
+    weight: 1,
+    type: "defensive",
+    description: "Advantage on saves against Turn Undead"
+  },
+  "Turn Immunity": {
+    name: "Turn Immunity",
+    weight: 1,
+    type: "defensive",
+    description: "Immune to Turn Undead"
+  },
+  // ===== SPECIAL WEAPON / ABILITY FEATURES (1 weight) =====
+  "Angelic Weapons": {
+    name: "Angelic Weapons",
+    weight: 1,
+    type: "offensive",
+    description: "Weapons are magical and deal extra radiant damage"
+  },
+  "Heated Body": {
+    name: "Heated Body",
+    weight: 1,
+    type: "defensive",
+    description: "Damages creatures that touch or hit it"
+  },
+  "Heated Weapons": {
+    name: "Heated Weapons",
+    weight: 1,
+    type: "offensive",
+    description: "Weapons deal extra fire damage"
+  },
+  Constrict: {
+    name: "Constrict",
+    weight: 1,
+    type: "offensive",
+    description: "Grapples and crushes grappled creatures"
+  },
+  Swallow: {
+    name: "Swallow",
+    weight: 1,
+    type: "offensive",
+    description: "Can swallow grappled creatures whole"
+  },
+  Engulf: {
+    name: "Engulf",
+    weight: 1,
+    type: "offensive",
+    description: "Can engulf multiple creatures"
+  },
+  "Breath Weapon": {
+    name: "Breath Weapon",
+    weight: 2,
+    type: "offensive",
+    description: "Powerful area attack (recharge 5-6)"
+  },
+  Petrification: {
+    name: "Petrifying Gaze",
+    weight: 2,
+    type: "offensive",
+    description: "Can turn creatures to stone"
+  },
+  Enlarge: {
+    name: "Enlarge",
+    weight: 1,
+    type: "utility",
+    description: "Can magically increase size and power"
+  },
+  Relentless: {
+    name: "Relentless",
+    weight: 1,
+    type: "defensive",
+    description: "Can survive lethal damage once per rest"
+  },
+  "Magic Weapons": {
+    name: "Magic Weapons",
+    weight: 0,
+    type: "offensive",
+    description: "Weapons count as magical for overcoming resistance (doesn't affect CR)"
+  }
+};
 class CRCalculatorService {
   static ID = "fvtt-challenge-calculator";
   static FLAGS = {
@@ -634,15 +970,22 @@ class CRCalculatorService {
     const immunBonus = actor.system.traits.di.value.size * 2;
     const resistBonus = actor.system.traits.dr.value.size;
     const vulnPenalty = -1 * actor.system.traits.dv.value.size;
-    const detectedMonsterFeatures = data.items.filter((item) => monsterFeatures.indexOf(item.name) > -1).map((item) => item.name);
-    const monsterFeatureCount = detectedMonsterFeatures.length;
+    const detectedMonsterFeatures = data.items.filter((item) => monsterFeatures[item.name]).map((item) => item.name);
+    const monsterFeatureWeight = detectedMonsterFeatures.reduce((total, featureName) => {
+      const feature = monsterFeatures[featureName];
+      if (feature && (feature.type === "defensive" || feature.type === "utility" || feature.type === "legendary")) {
+        return total + feature.weight;
+      }
+      return total;
+    }, 0);
+    const monsterFeatureBonus = monsterFeatureWeight / 4;
     const ac = actor.system.attributes.ac.value;
     const hp = actor.system.attributes.hp.max;
     let defensiveCR = 0;
     challengeRatings.forEach((chall) => {
       if (hp >= chall.hit_points_min && hp <= chall.hit_points_max) {
         const attBonusMod = (ac - chall.armor_class) / 2;
-        defensiveCR = chall.cr + attBonusMod + immunBonus + resistBonus + vulnPenalty + monsterFeatureCount;
+        defensiveCR = chall.cr + attBonusMod + immunBonus + resistBonus + vulnPenalty + monsterFeatureBonus;
       }
     });
     return {
@@ -769,7 +1112,7 @@ const version = "2.1.0";
 const packageInfo = {
   version
 };
-const buildNumber = 3;
+const buildNumber = 4;
 const buildInfo = {
   buildNumber
 };

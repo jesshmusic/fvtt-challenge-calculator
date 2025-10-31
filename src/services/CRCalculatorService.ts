@@ -340,11 +340,23 @@ export class CRCalculatorService {
     const resistBonus = actor.system.traits.dr.value.size;
     const vulnPenalty = -1 * actor.system.traits.dv.value.size;
 
+    // Calculate weighted CR bonus from monster features
     const detectedMonsterFeatures = data.items
-      .filter((item: any) => monsterFeatures.indexOf(item.name) > -1)
+      .filter((item: any) => monsterFeatures[item.name])
       .map((item: any) => item.name);
 
-    const monsterFeatureCount = detectedMonsterFeatures.length;
+    // Sum the weights of detected defensive/utility features
+    const monsterFeatureWeight = detectedMonsterFeatures.reduce((total: number, featureName: string) => {
+      const feature = monsterFeatures[featureName];
+      // Only count defensive and utility features for defensive CR
+      if (feature && (feature.type === 'defensive' || feature.type === 'utility' || feature.type === 'legendary')) {
+        return total + feature.weight;
+      }
+      return total;
+    }, 0);
+
+    // Convert weight to CR bonus (weight of 4 = +1 CR)
+    const monsterFeatureBonus = monsterFeatureWeight / 4;
 
     const ac = actor.system.attributes.ac.value;
     const hp = actor.system.attributes.hp.max;
@@ -354,7 +366,7 @@ export class CRCalculatorService {
       if (hp >= chall.hit_points_min && hp <= chall.hit_points_max) {
         const attBonusMod = (ac - chall.armor_class) / 2;
         defensiveCR =
-          chall.cr + attBonusMod + immunBonus + resistBonus + vulnPenalty + monsterFeatureCount;
+          chall.cr + attBonusMod + immunBonus + resistBonus + vulnPenalty + monsterFeatureBonus;
       }
     });
 

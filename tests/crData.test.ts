@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
-import { challengeRatings, monsterFeatures } from '../src/data/crData';
+import { challengeRatings, monsterFeatures, monsterFeatureNames } from '../src/data/crData';
 
 describe('Challenge Rating Data', () => {
   describe('challengeRatings array', () => {
@@ -218,42 +218,93 @@ describe('Challenge Rating Data', () => {
   describe('Monster Features', () => {
     test('monsterFeatures is defined and not empty', () => {
       expect(monsterFeatures).toBeDefined();
-      expect(monsterFeatures.length).toBeGreaterThan(0);
+      expect(Object.keys(monsterFeatures).length).toBeGreaterThan(0);
     });
 
-    test('contains common defensive features', () => {
-      const defensiveFeatures = [
-        'Magic Resistance',
-        'Legendary Resistance',
-        'Regeneration',
-        'Damage Transfer',
-      ];
+    test('contains common defensive features with correct weights', () => {
+      expect(monsterFeatures['Magic Resistance']).toBeDefined();
+      expect(monsterFeatures['Magic Resistance'].weight).toBe(2);
+      expect(monsterFeatures['Magic Resistance'].type).toBe('defensive');
 
-      defensiveFeatures.forEach((feature) => {
-        expect(monsterFeatures).toContain(feature);
+      expect(monsterFeatures['Legendary Resistance']).toBeDefined();
+      expect(monsterFeatures['Legendary Resistance'].weight).toBe(3);
+      expect(monsterFeatures['Legendary Resistance'].type).toBe('legendary');
+
+      expect(monsterFeatures['Regeneration']).toBeDefined();
+      expect(monsterFeatures['Regeneration'].weight).toBe(2);
+      expect(monsterFeatures['Regeneration'].type).toBe('defensive');
+
+      expect(monsterFeatures['Damage Transfer']).toBeDefined();
+      expect(monsterFeatures['Damage Transfer'].weight).toBe(3);
+      expect(monsterFeatures['Damage Transfer'].type).toBe('defensive');
+    });
+
+    test('contains common offensive features with correct weights', () => {
+      expect(monsterFeatures['Pack Tactics']).toBeDefined();
+      expect(monsterFeatures['Pack Tactics'].weight).toBe(1);
+      expect(monsterFeatures['Pack Tactics'].type).toBe('offensive');
+
+      expect(monsterFeatures['Pounce']).toBeDefined();
+      expect(monsterFeatures['Pounce'].weight).toBe(1);
+      expect(monsterFeatures['Pounce'].type).toBe('offensive');
+
+      expect(monsterFeatures['Rampage']).toBeDefined();
+      expect(monsterFeatures['Rampage'].weight).toBe(1);
+      expect(monsterFeatures['Rampage'].type).toBe('offensive');
+    });
+
+    test('all features have required properties', () => {
+      Object.values(monsterFeatures).forEach((feature) => {
+        expect(feature).toHaveProperty('name');
+        expect(feature).toHaveProperty('weight');
+        expect(feature).toHaveProperty('type');
+        expect(feature).toHaveProperty('description');
+        expect(typeof feature.name).toBe('string');
+        expect(typeof feature.weight).toBe('number');
+        expect(typeof feature.description).toBe('string');
+        expect(['defensive', 'offensive', 'utility', 'legendary']).toContain(feature.type);
       });
     });
 
-    test('contains common offensive features', () => {
-      const offensiveFeatures = ['Pack Tactics', 'Pounce', 'Rampage'];
-
-      offensiveFeatures.forEach((feature) => {
-        // At least some of these should be in the list
-        const found = offensiveFeatures.some((f) => monsterFeatures.includes(f));
-        expect(found).toBe(true);
+    test('feature weights are in valid range', () => {
+      Object.values(monsterFeatures).forEach((feature) => {
+        expect(feature.weight).toBeGreaterThanOrEqual(-1);
+        expect(feature.weight).toBeLessThanOrEqual(4);
       });
     });
 
-    test('all features are strings', () => {
-      monsterFeatures.forEach((feature) => {
-        expect(typeof feature).toBe('string');
-        expect(feature.length).toBeGreaterThan(0);
-      });
+    test('legendary features have high weights', () => {
+      expect(monsterFeatures['Legendary Resistance'].weight).toBeGreaterThanOrEqual(3);
+      expect(monsterFeatures['Possession'].weight).toBeGreaterThanOrEqual(3);
     });
 
-    test('no duplicate features', () => {
-      const uniqueFeatures = new Set(monsterFeatures);
-      expect(uniqueFeatures.size).toBe(monsterFeatures.length);
+    test('utility features generally have lower weights', () => {
+      expect(monsterFeatures['Keen Senses'].weight).toBe(0);
+      expect(monsterFeatures['Spider Climb'].weight).toBe(0);
+      expect(monsterFeatures['Amphibious'].weight).toBe(0);
+    });
+
+    test('negative weight features exist for weaknesses', () => {
+      expect(monsterFeatures['Sunlight Sensitivity'].weight).toBe(-1);
+      expect(monsterFeatures['Light Sensitivity'].weight).toBe(-1);
+    });
+
+    test('monsterFeatureNames array matches keys', () => {
+      const keys = Object.keys(monsterFeatures);
+      expect(monsterFeatureNames).toEqual(keys);
+      expect(monsterFeatureNames.length).toBe(keys.length);
+    });
+
+    test('contains comprehensive list of features', () => {
+      // Should have at least 50 features
+      expect(Object.keys(monsterFeatures).length).toBeGreaterThanOrEqual(50);
+
+      // Should include various types
+      const types = Object.values(monsterFeatures).map((f) => f.type);
+      expect(new Set(types)).toContain('defensive');
+      expect(new Set(types)).toContain('offensive');
+      expect(new Set(types)).toContain('utility');
+      expect(new Set(types)).toContain('legendary');
     });
   });
 
