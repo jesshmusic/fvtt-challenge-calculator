@@ -32,10 +32,14 @@ const shouldShowCRButton = (actorObject: any): boolean => {
  */
 Hooks.once('init', async function () {
   console.log(
-    "%c⚔️ Dorman Lakely's 5e CR Calculator %cv" + packageInfo.version + " %c(build " + buildInfo.buildNumber + ")",
+    "%c⚔️ Dorman Lakely's 5e CR Calculator %cv" +
+      packageInfo.version +
+      ' %c(build ' +
+      buildInfo.buildNumber +
+      ')',
     'color: #d32f2f; font-weight: bold; font-size: 16px;',
     'color: #ff9800; font-weight: bold; font-size: 14px;',
-    'color: #ffeb3b; font-weight: normal; font-size: 12px;'
+    'color: #ffeb3b; font-weight: normal; font-size: 12px;',
   );
 });
 
@@ -43,7 +47,7 @@ Hooks.once('ready', async function () {
   console.log(
     "%c⚔️ Dorman Lakely's 5e CR Calculator %c✓ Ready!",
     'color: #d32f2f; font-weight: bold; font-size: 16px;',
-    'color: #4caf50; font-weight: bold; font-size: 14px;'
+    'color: #4caf50; font-weight: bold; font-size: 14px;',
   );
 });
 
@@ -54,13 +58,13 @@ Hooks.once('ready', async function () {
 
 // Try all possible v13 hook names
 const hookNames = [
-  'renderNPCActorSheet',           // v13 ApplicationV2 name
-  'renderdnd5e.NPCActorSheet',     // With module prefix
-  'renderActorSheet5eNPC2',        // Legacy name
-  'renderActorSheet',              // v12 fallback
+  'renderNPCActorSheet', // v13 ApplicationV2 name
+  'renderdnd5e.NPCActorSheet', // With module prefix
+  'renderActorSheet5eNPC2', // Legacy name
+  'renderActorSheet', // v12 fallback
 ];
 
-hookNames.forEach(hookName => {
+hookNames.forEach((hookName) => {
   Hooks.on(hookName, (app: any, html: JQuery | HTMLElement, data?: any) => {
     // Get actor object (v13 uses app.document, v12 uses app.object)
     const actor = app.document || app.object || app.actor;
@@ -125,7 +129,7 @@ hookNames.forEach(hookName => {
         console.error('CR Calculator: Error calculating CR', error);
         ui.notifications?.error(
           `Error calculating CR: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          { permanent: true }
+          { permanent: true },
         );
       }
     });

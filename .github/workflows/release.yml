@@ -42,7 +42,7 @@ jobs:
         run: npm run build
 
       - name: Create module archive
-        run: zip -r ./module.zip module.json README.md LICENSE CHANGELOG.md styles/ scripts/ languages/ templates/
+        run: zip -r ./module.zip module.json README.md LICENSE styles/ templates/ lang/ dist/ icons/
 
       - name: Create git tag
         run: |
@@ -81,7 +81,7 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Authorization: ${{ secrets.FOUNDRY_PACKAGE_TOKEN }}" \
             -d '{
-              "id": "fvtt-challenge-calculator",
+              "id": "em-tile-utilities",
               "dry-run": false,
               "release": {
                 "version": "${{ steps.version.outputs.version }}",

@@ -5,34 +5,39 @@ All notable changes to Dorman Lakely's 5e CR Calculator will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2025-10-31
+
+
 ## [2.2.0] - 2025-10-31
 
 ### Added
+
 - add comprehensive weighted monster features system
 - add comprehensive Jest test suite for CR Calculator
 
 ### Fixed
-- resolve TypeScript type errors with optional chaining
 
+- resolve TypeScript type errors with optional chaining
 
 ## [2.1.0] - 2025-10-30
 
 ### Added
+
 - add auto-release workflow and release scripts for master branch
 - add manual release workflow
 - chore: update startup logs to match consistent format with colored version/build numbers, add auto-increment build system
 
 ### Changed
-- bump version to 2.0.1
 
+- bump version to 2.0.1
 
 ## [2.0.1] - 2025-10-30
 
 ### Added
+
 - add auto-release workflow and release scripts for master branch
 - add manual release workflow
 - chore: update startup logs to match consistent format with colored version/build numbers, add auto-increment build system
-
 
 ## [2.0.0] - 2024-10-30
 
