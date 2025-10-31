@@ -167,7 +167,8 @@ export class CRCalculatorService {
     // Get weapon names for display (v13 uses damage.base instead of damage.parts)
     const detectedWeapons = data.items
       .filter(
-        (item: any) => item.system.damage && item.system.damage.base && item.system.damage.base.formula
+        (item: any) =>
+          item.system.damage && item.system.damage.base && item.system.damage.base.formula,
       )
       .map((item: any) => item.name);
 
@@ -235,13 +236,17 @@ export class CRCalculatorService {
         }
         // Optionally include versatile damage if it exists
         if (item.system.damage.versatile && item.system.damage.versatile.formula) {
-          damages.push([item.system.damage.versatile.formula, item.system.damage.versatile.types?.[0] || '']);
+          damages.push([
+            item.system.damage.versatile.formula,
+            item.system.damage.versatile.types?.[0] || '',
+          ]);
         }
 
         // v13: properties might be a Set instead of an object
-        const hasFinesseProperty = item.system.properties instanceof Set
-          ? item.system.properties.has('fin')
-          : 'fin' in (item.system.properties || {});
+        const hasFinesseProperty =
+          item.system.properties instanceof Set
+            ? item.system.properties.has('fin')
+            : 'fin' in (item.system.properties || {});
 
         const atkBonus =
           hasFinesseProperty && actor.system.abilities.dex.mod > actor.system.abilities.str.mod
@@ -346,14 +351,22 @@ export class CRCalculatorService {
       .map((item: any) => item.name);
 
     // Sum the weights of detected defensive/utility features
-    const monsterFeatureWeight = detectedMonsterFeatures.reduce((total: number, featureName: string) => {
-      const feature = monsterFeatures[featureName];
-      // Only count defensive and utility features for defensive CR
-      if (feature && (feature.type === 'defensive' || feature.type === 'utility' || feature.type === 'legendary')) {
-        return total + feature.weight;
-      }
-      return total;
-    }, 0);
+    const monsterFeatureWeight = detectedMonsterFeatures.reduce(
+      (total: number, featureName: string) => {
+        const feature = monsterFeatures[featureName];
+        // Only count defensive and utility features for defensive CR
+        if (
+          feature &&
+          (feature.type === 'defensive' ||
+            feature.type === 'utility' ||
+            feature.type === 'legendary')
+        ) {
+          return total + feature.weight;
+        }
+        return total;
+      },
+      0,
+    );
 
     // Convert weight to CR bonus (weight of 4 = +1 CR)
     const monsterFeatureBonus = monsterFeatureWeight / 4;

@@ -122,7 +122,11 @@ export class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2
   /**
    * Close the dialog without applying
    */
-  static async onClose(this: CRCalculatorDialog, _event: Event, _target: HTMLElement): Promise<void> {
+  static async onClose(
+    this: CRCalculatorDialog,
+    _event: Event,
+    _target: HTMLElement,
+  ): Promise<void> {
     this.close();
   }
 }
