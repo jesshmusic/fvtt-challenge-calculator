@@ -2,7 +2,7 @@
   "id": "fvtt-challenge-calculator",
   "title": "Dorman Lakely's 5e CR Calculator",
   "description": "Calculate accurate Challenge Ratings for D&D 5e NPCs based on DMG guidelines. Analyzes HP, AC, damage output, and special abilities to determine CR automatically.",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
@@ -25,7 +25,7 @@
   ],
   "url": "https://github.com/jesshmusic/fvtt-challenge-calculator",
   "manifest": "https://github.com/jesshmusic/fvtt-challenge-calculator/releases/latest/download/module.json",
-  "download": "https://github.com/jesshmusic/fvtt-challenge-calculator/releases/download/v2.4.1/module.zip",
+  "download": "https://github.com/jesshmusic/fvtt-challenge-calculator/releases/download/v2.4.2/module.zip",
   "license": "LICENSE",
   "readme": "README.md",
   "media": [

@@ -153,11 +153,13 @@ export class CRCalculatorService {
 
     let attackBonusCR = 0;
     let spellCastingCR = 0;
+    let proficiencyBonus = 0;
 
     challengeRatings.forEach((chall) => {
       if (dpr >= chall.damage_min && dpr <= chall.damage_max) {
         const attBonusMod = (attackBonus + chall.prof_bonus - chall.attack_bonus) / 2;
         attackBonusCR = chall.cr + attBonusMod + featsBonus;
+        proficiencyBonus = chall.prof_bonus;
       }
       if (spellSaveDC === chall.save_dc && spellCastingCR === 0) {
         spellCastingCR = chall.cr + featsBonus;
@@ -177,7 +179,7 @@ export class CRCalculatorService {
       breakdown: {
         dpr,
         numAttacks,
-        attackBonus,
+        attackBonus: attackBonus + proficiencyBonus,
         spellSaveDC,
         numFeats,
         detectedWeapons,
@@ -221,25 +223,112 @@ export class CRCalculatorService {
     const isMulti = !!multiAttackItem;
 
     let damagesArray: number[] = [];
-    // v13: Check for damage.base.formula instead of damage.parts
-    const offensiveItems = data.items.filter(
-      (item: any) =>
-        item.system.damage && item.system.damage.base && item.system.damage.base.formula,
-    );
+    // v13: Check for damage in either formula format or structured format
+    const offensiveItems = data.items.filter((item: any) => {
+      // Check for weapon/feat items with damage
+      if (item.system.damage) {
+        // Old format: damage.base.formula
+        if (item.system.damage.base && item.system.damage.base.formula) return true;
+        // New format: damage.base with number/denomination
+        if (
+          item.system.damage.base &&
+          item.system.damage.base.number &&
+          item.system.damage.base.denomination
+        )
+          return true;
+      }
+      // Check for items with activities that have damage (check both item.activities and item.system.activities)
+      const activitiesRaw = item.activities || item.system.activities;
+      if (activitiesRaw) {
+        // Handle both plain objects and Foundry Collections
+        const activitiesList =
+          activitiesRaw.contents ||
+          Array.from(activitiesRaw.values?.() || []) ||
+          Object.values(activitiesRaw);
+        return activitiesList.some(
+          (activity: any) =>
+            activity.damage && (activity.damage.parts?.length > 0 || activity.damage.includeBase),
+        );
+      }
+      return false;
+    });
 
     offensiveItems.forEach((item: any) => {
       try {
-        // v13: damage is now in damage.base and damage.versatile
+        // v13: damage is now in damage.base and damage.versatile, or in activities
         const damages = [];
-        if (item.system.damage.base && item.system.damage.base.formula) {
-          damages.push([item.system.damage.base.formula, item.system.damage.base.types?.[0] || '']);
+
+        // Helper function to convert structured damage to formula string
+        const structuredToFormula = (dmg: any): string | null => {
+          if (!dmg) return null;
+          const num = dmg.number || 1;
+          const die = dmg.denomination || 0;
+          const bonus = dmg.bonus || '';
+          if (die > 0) {
+            return `${num}d${die}${bonus ? '+' + bonus : ''}`;
+          }
+          return null;
+        };
+
+        // Handle base damage (old formula format or new structured format)
+        if (item.system.damage && item.system.damage.base) {
+          const base = item.system.damage.base;
+          const formula =
+            base.formula ||
+            structuredToFormula(base) ||
+            (base.custom?.enabled ? base.custom.formula : null);
+          if (formula) {
+            damages.push([formula, base.types?.[0] || '']);
+          }
         }
-        // Optionally include versatile damage if it exists
-        if (item.system.damage.versatile && item.system.damage.versatile.formula) {
-          damages.push([
-            item.system.damage.versatile.formula,
-            item.system.damage.versatile.types?.[0] || '',
-          ]);
+
+        // Handle versatile damage
+        if (item.system.damage && item.system.damage.versatile) {
+          const versatile = item.system.damage.versatile;
+          const formula =
+            versatile.formula ||
+            structuredToFormula(versatile) ||
+            (versatile.custom?.enabled ? versatile.custom.formula : null);
+          if (formula) {
+            damages.push([formula, versatile.types?.[0] || '']);
+          }
+        }
+
+        // Include additional damage parts from legacy system.damage.parts
+        if (
+          item.system.damage &&
+          item.system.damage.parts &&
+          Array.isArray(item.system.damage.parts)
+        ) {
+          item.system.damage.parts.forEach((part: any) => {
+            if (part[0]) {
+              damages.push([part[0], part[1] || '']);
+            }
+          });
+        }
+
+        // Handle v13 activities-based damage (attacks, saves, damage activities)
+        // Check both item.activities and item.system.activities
+        const activitiesRaw = item.activities || item.system.activities;
+        if (activitiesRaw) {
+          // Handle both plain objects and Foundry Collections
+          const activitiesList =
+            activitiesRaw.contents ||
+            Array.from(activitiesRaw.values?.() || []) ||
+            Object.values(activitiesRaw);
+          activitiesList.forEach((activity: any) => {
+            if (activity.damage && activity.damage.parts && Array.isArray(activity.damage.parts)) {
+              activity.damage.parts.forEach((part: any) => {
+                const formula =
+                  part.custom?.enabled && part.custom?.formula
+                    ? part.custom.formula
+                    : structuredToFormula(part);
+                if (formula) {
+                  damages.push([formula, Array.isArray(part.types) ? part.types[0] : '']);
+                }
+              });
+            }
+          });
         }
 
         // v13: properties might be a Set instead of an object
@@ -261,10 +350,11 @@ export class CRCalculatorService {
         damageBonus = dmgBonus > damageBonus ? dmgBonus : damageBonus;
 
         const isFeat = item.type === 'feat';
+        const isWeapon = item.type === 'weapon';
 
         if (damages.length > 0) {
           let dprResult = 0;
-          damages.forEach((dam: any) => {
+          damages.forEach((dam: any, index: number) => {
             if (dam.length > 0) {
               const diceRegex =
                 /(\d*)[dD](\d*)(([+*-](?:\d+|\@mod|\([a-zA-Z]*\)))*)(\[+-](\d*))?/gm;
@@ -287,9 +377,20 @@ export class CRCalculatorService {
                     ? ((diceNum * diceValue) / 2) * numAttacks
                     : (diceNum * diceValue) / 2;
 
-                dprResult += baseDam + diceModifier;
-                if (useDiceMod) {
-                  dprResult += damageBonus;
+                // For multiattack, modifiers should be multiplied by number of attacks
+                const effectiveModifier =
+                  isMulti && !isFeat ? diceModifier * numAttacks : diceModifier;
+                const effectiveDamageBonus =
+                  isMulti && !isFeat ? damageBonus * numAttacks : damageBonus;
+
+                dprResult += baseDam + effectiveModifier;
+
+                // Add ability modifier if:
+                // 1. Formula explicitly includes @mod, OR
+                // 2. This is a weapon's base damage (first damage entry) without a static modifier
+                const isBaseDamage = index === 0 && isWeapon && diceModifier === 0;
+                if (useDiceMod || isBaseDamage) {
+                  dprResult += effectiveDamageBonus;
                 }
               }
             }

@@ -5,6 +5,19 @@ All notable changes to Dorman Lakely's 5e CR Calculator will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.2] - 2025-11-06
+
+### Fixed
+
+- Fixed offensive CR calculations to properly include attack and damage bonuses
+- Fixed multiattack DPR calculation to correctly multiply modifiers by number of attacks
+- Fixed attack bonus display to include proficiency bonus
+- Added support for Foundry VTT v13 ActivityCollection damage structure
+- Added support for v13 structured damage format (number/denomination) in addition to formula strings
+- Fixed ability modifier being applied to weapon base damage
+- Added support for additional damage from weapon activities (e.g., poison, fire damage)
+- Fixed damage calculation to include all damage parts from feat activities (e.g., Sneak Attack)
+
 ## [2.4.1] - 2025-10-31
 
 ### Fixed
