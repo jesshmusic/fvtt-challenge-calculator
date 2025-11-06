@@ -855,10 +855,12 @@ class CRCalculatorService {
     const dpr = damageCalc.dpr;
     let attackBonusCR = 0;
     let spellCastingCR = 0;
+    let proficiencyBonus = 0;
     challengeRatings.forEach((chall) => {
       if (dpr >= chall.damage_min && dpr <= chall.damage_max) {
         const attBonusMod = (attackBonus + chall.prof_bonus - chall.attack_bonus) / 2;
         attackBonusCR = chall.cr + attBonusMod + featsBonus;
+        proficiencyBonus = chall.prof_bonus;
       }
       if (spellSaveDC === chall.save_dc && spellCastingCR === 0) {
         spellCastingCR = chall.cr + featsBonus;
@@ -872,7 +874,7 @@ class CRCalculatorService {
       breakdown: {
         dpr,
         numAttacks,
-        attackBonus,
+        attackBonus: attackBonus + proficiencyBonus,
         spellSaveDC,
         numFeats,
         detectedWeapons
@@ -898,20 +900,68 @@ class CRCalculatorService {
     });
     const isMulti = !!multiAttackItem;
     let damagesArray = [];
-    const offensiveItems = data.items.filter(
-      (item) => item.system.damage && item.system.damage.base && item.system.damage.base.formula
-    );
+    const offensiveItems = data.items.filter((item) => {
+      if (item.system.damage) {
+        if (item.system.damage.base && item.system.damage.base.formula) return true;
+        if (item.system.damage.base && item.system.damage.base.number && item.system.damage.base.denomination)
+          return true;
+      }
+      const activitiesRaw = item.activities || item.system.activities;
+      if (activitiesRaw) {
+        const activitiesList = activitiesRaw.contents || Array.from(activitiesRaw.values?.() || []) || Object.values(activitiesRaw);
+        return activitiesList.some(
+          (activity) => activity.damage && (activity.damage.parts?.length > 0 || activity.damage.includeBase)
+        );
+      }
+      return false;
+    });
     offensiveItems.forEach((item) => {
       try {
         const damages = [];
-        if (item.system.damage.base && item.system.damage.base.formula) {
-          damages.push([item.system.damage.base.formula, item.system.damage.base.types?.[0] || ""]);
+        const structuredToFormula = (dmg) => {
+          if (!dmg) return null;
+          const num = dmg.number || 1;
+          const die = dmg.denomination || 0;
+          const bonus = dmg.bonus || "";
+          if (die > 0) {
+            return `${num}d${die}${bonus ? "+" + bonus : ""}`;
+          }
+          return null;
+        };
+        if (item.system.damage && item.system.damage.base) {
+          const base = item.system.damage.base;
+          const formula = base.formula || structuredToFormula(base) || (base.custom?.enabled ? base.custom.formula : null);
+          if (formula) {
+            damages.push([formula, base.types?.[0] || ""]);
+          }
         }
-        if (item.system.damage.versatile && item.system.damage.versatile.formula) {
-          damages.push([
-            item.system.damage.versatile.formula,
-            item.system.damage.versatile.types?.[0] || ""
-          ]);
+        if (item.system.damage && item.system.damage.versatile) {
+          const versatile = item.system.damage.versatile;
+          const formula = versatile.formula || structuredToFormula(versatile) || (versatile.custom?.enabled ? versatile.custom.formula : null);
+          if (formula) {
+            damages.push([formula, versatile.types?.[0] || ""]);
+          }
+        }
+        if (item.system.damage && item.system.damage.parts && Array.isArray(item.system.damage.parts)) {
+          item.system.damage.parts.forEach((part) => {
+            if (part[0]) {
+              damages.push([part[0], part[1] || ""]);
+            }
+          });
+        }
+        const activitiesRaw = item.activities || item.system.activities;
+        if (activitiesRaw) {
+          const activitiesList = activitiesRaw.contents || Array.from(activitiesRaw.values?.() || []) || Object.values(activitiesRaw);
+          activitiesList.forEach((activity) => {
+            if (activity.damage && activity.damage.parts && Array.isArray(activity.damage.parts)) {
+              activity.damage.parts.forEach((part) => {
+                const formula = part.custom?.enabled && part.custom?.formula ? part.custom.formula : structuredToFormula(part);
+                if (formula) {
+                  damages.push([formula, Array.isArray(part.types) ? part.types[0] : ""]);
+                }
+              });
+            }
+          });
         }
         const hasFinesseProperty = item.system.properties instanceof Set ? item.system.properties.has("fin") : "fin" in (item.system.properties || {});
         const atkBonus = hasFinesseProperty && actor.system.abilities.dex.mod > actor.system.abilities.str.mod ? actor.system.abilities.dex.mod : attackBonus;
@@ -919,9 +969,10 @@ class CRCalculatorService {
         const dmgBonus = hasFinesseProperty && actor.system.abilities.dex.mod > actor.system.abilities.str.mod ? actor.system.abilities.dex.mod : damageBonus;
         damageBonus = dmgBonus > damageBonus ? dmgBonus : damageBonus;
         const isFeat = item.type === "feat";
+        const isWeapon = item.type === "weapon";
         if (damages.length > 0) {
           let dprResult = 0;
-          damages.forEach((dam) => {
+          damages.forEach((dam, index) => {
             if (dam.length > 0) {
               const diceRegex = /(\d*)[dD](\d*)(([+*-](?:\d+|\@mod|\([a-zA-Z]*\)))*)(\[+-](\d*))?/gm;
               const dieStr = dam[0].replace(/\s/g, "").replace(/\[.*\]/g, "");
@@ -935,9 +986,12 @@ class CRCalculatorService {
                   attackBonus = diceModifier + attackBonus;
                 }
                 const baseDam = isMulti && !isFeat ? diceNum * diceValue / 2 * numAttacks : diceNum * diceValue / 2;
-                dprResult += baseDam + diceModifier;
-                if (useDiceMod) {
-                  dprResult += damageBonus;
+                const effectiveModifier = isMulti && !isFeat ? diceModifier * numAttacks : diceModifier;
+                const effectiveDamageBonus = isMulti && !isFeat ? damageBonus * numAttacks : damageBonus;
+                dprResult += baseDam + effectiveModifier;
+                const isBaseDamage = index === 0 && isWeapon && diceModifier === 0;
+                if (useDiceMod || isBaseDamage) {
+                  dprResult += effectiveDamageBonus;
                 }
               }
             }
@@ -1114,11 +1168,11 @@ class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     this.close();
   }
 }
-const version = "2.4.1";
+const version = "2.4.2";
 const packageInfo = {
   version
 };
-const buildNumber = 7;
+const buildNumber = 15;
 const buildInfo = {
   buildNumber
 };
