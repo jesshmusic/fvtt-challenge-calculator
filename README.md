@@ -116,7 +116,6 @@ fvtt-challenge-calculator/
 
 ## Known Limitations
 
-- Only works with default dnd5e NPC sheets
 - Damage parsing may fail on unusual dice expressions (errors are reported to chat)
 - Does not account for legendary actions or lair actions
 - CR 0 creatures may not calculate accurately due to minimal stats
