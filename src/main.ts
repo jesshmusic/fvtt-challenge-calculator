@@ -6,26 +6,10 @@ import buildInfo from '../build-info.json';
 
 /**
  * Check if the CR button should be shown for this actor
- * Only shows for default dnd5e NPC sheets when user is GM
+ * Shows for any NPC sheet when user is GM (supports default, Tidy 5e, and other custom sheets)
  */
 const shouldShowCRButton = (actorObject: any): boolean => {
-  if (actorObject.type === 'npc') {
-    if (
-      (!actorObject.flags || Object.keys(actorObject.flags).length === 0) &&
-      (game.user?.isGM || (game.user as any)?.isTheGM)
-    ) {
-      return true;
-    } else if (
-      (!actorObject.flags.core?.sheetClass ||
-        actorObject.flags.core.sheetClass === '' ||
-        actorObject.flags.core.sheetClass === 'dnd5e.ActorSheet5eNPC' ||
-        actorObject.flags.core.sheetClass === 'dnd5e.ActorSheet5eNPC2') &&
-      game.user?.isGM
-    ) {
-      return true;
-    }
-  }
-  return false;
+  return actorObject.type === 'npc' && !!(game.user?.isGM || (game.user as any)?.isTheGM);
 };
 
 /**
@@ -125,12 +109,17 @@ hookNames.forEach((hookName) => {
 
     // Find the header section - try multiple selectors for different sheet versions
     // v13: .window-header .header-elements (in window header)
+    // Tidy 5e / generic: .window-header .window-title (insert after title)
     // v12: .header-details.flexrow (in sheet body)
-    let headerDetails = sheetElement.querySelector('.window-header .header-elements');
-
-    if (!headerDetails) {
-      // Fallback to v12 selector
-      headerDetails = sheetElement.querySelector('.header-details.flexrow');
+    const headerSelectors = [
+      '.window-header .header-elements',
+      '.window-header .window-title',
+      '.header-details.flexrow',
+    ];
+    let headerDetails: Element | null = null;
+    for (const selector of headerSelectors) {
+      headerDetails = sheetElement.querySelector(selector);
+      if (headerDetails) break;
     }
 
     if (!headerDetails) {
