@@ -5,6 +5,20 @@ All notable changes to Dorman Lakely's 5e CR Calculator will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.3] - 2026-03-24
+
+### Added
+
+- Compatibility with Tidy 5e Sheets (including Quadrone layout)
+- MutationObserver-based detection for custom NPC sheet modules
+- DOM scan using `foundry.applications.instances` for reliable sheet discovery
+- CSS support for dark-themed sheet headers
+
+### Fixed
+
+- CR Calc button not appearing on non-standard NPC sheets
+- Button placement in sheets that hide `.window-title` elements
+
 ## [2.4.2] - 2025-11-06
 
 ### Fixed
