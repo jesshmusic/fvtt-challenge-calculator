@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Foundry VTT v14 compatibility (`compatibility.verified` bumped to `14`).
+- Foundry VTT v14 compatibility (`compatibility.verified` bumped to `14`). **Minimum Foundry version bumped to 14**. Earlier versions of this module remain available for v13 users from the GitHub releases page; this version is v14-only by design.
 - dnd5e 5.x support: spell save DC lookup now reads `actor.system.attributes.spell.level` (the dnd5e 5.x location after data preparation), falling back to `system.details.spellLevel` (dnd5e 4.x) and finally to `system.details.cr`. Spellcasting NPCs no longer silently report a spell save DC of 0 on dnd5e 5.x.
 - Render hook list now also tries `renderActorSheet5eNPC` for older dnd5e versions.
 

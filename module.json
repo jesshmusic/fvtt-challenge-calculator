@@ -4,7 +4,7 @@
   "description": "Calculate accurate Challenge Ratings for D&D 5e NPCs based on DMG guidelines. Analyzes HP, AC, damage output, and special abilities to determine CR automatically.",
   "version": "2.5.0",
   "compatibility": {
-    "minimum": "13",
+    "minimum": "14",
     "verified": "14"
   },
   "authors": [
@@ -13,8 +13,12 @@
       "url": "https://exitentialmusic.com"
     }
   ],
-  "esmodules": ["scripts/main.js"],
-  "styles": ["styles/module.css"],
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/module.css"
+  ],
   "languages": [
     {
       "lang": "en",
