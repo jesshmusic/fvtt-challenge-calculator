@@ -829,20 +829,20 @@ class CRCalculatorService {
    */
   static calculateOffensiveCR(actor, data) {
     let spellSaveDC = 0;
-    if (actor.system.attributes.spellcasting && actor.system.attributes.spellcasting !== "") {
-      const castingAbilityMod = actor.system.abilities[actor.system.attributes.spellcasting].mod;
-      const spellLevelCR = challengeRatings.find(
-        (crObj) => crObj.cr === actor.system.details.spellLevel
-      );
+    const spellcastingAbility = actor.system?.attributes?.spellcasting;
+    if (spellcastingAbility && spellcastingAbility !== "") {
+      const castingAbilityMod = actor.system?.abilities?.[spellcastingAbility]?.mod ?? 0;
+      const spellLevel = actor.system?.attributes?.spell?.level ?? actor.system?.details?.spellLevel ?? actor.system?.details?.cr;
+      const spellLevelCR = challengeRatings.find((crObj) => crObj.cr === spellLevel);
       if (spellLevelCR) {
         spellSaveDC = 8 + castingAbilityMod + spellLevelCR.prof_bonus;
       }
     }
     const numFeats = data.items.filter((item) => item.type === "feat").length;
     const featsBonus = numFeats > 0 ? numFeats / 3 : 0;
-    let damageBonus = actor.system.abilities.str.mod;
+    let damageBonus = actor.system?.abilities?.str?.mod ?? 0;
     let numAttacks = 1;
-    let attackBonus = actor.system.abilities.str.mod;
+    let attackBonus = actor.system?.abilities?.str?.mod ?? 0;
     const damageCalc = this.calculateDamagePerRound(
       data,
       numAttacks,
@@ -964,9 +964,12 @@ class CRCalculatorService {
           });
         }
         const hasFinesseProperty = item.system.properties instanceof Set ? item.system.properties.has("fin") : "fin" in (item.system.properties || {});
-        const atkBonus = hasFinesseProperty && actor.system.abilities.dex.mod > actor.system.abilities.str.mod ? actor.system.abilities.dex.mod : attackBonus;
+        const dexMod = actor.system?.abilities?.dex?.mod ?? 0;
+        const strMod = actor.system?.abilities?.str?.mod ?? 0;
+        const useFinesse = hasFinesseProperty && dexMod > strMod;
+        const atkBonus = useFinesse ? dexMod : attackBonus;
         attackBonus = atkBonus > attackBonus ? atkBonus : attackBonus;
-        const dmgBonus = hasFinesseProperty && actor.system.abilities.dex.mod > actor.system.abilities.str.mod ? actor.system.abilities.dex.mod : damageBonus;
+        const dmgBonus = useFinesse ? dexMod : damageBonus;
         damageBonus = dmgBonus > damageBonus ? dmgBonus : damageBonus;
         const isFeat = item.type === "feat";
         const isWeapon = item.type === "weapon";
@@ -1024,9 +1027,19 @@ class CRCalculatorService {
    * Calculate defensive CR based on HP, AC, and defensive abilities
    */
   static calculateDefensiveCR(actor, data) {
-    const immunBonus = actor.system.traits.di.value.size * 2;
-    const resistBonus = actor.system.traits.dr.value.size;
-    const vulnPenalty = -1 * actor.system.traits.dv.value.size;
+    const traitSize = (trait) => {
+      const v = trait?.value;
+      if (!v) return 0;
+      if (typeof v.size === "number") return v.size;
+      if (Array.isArray(v)) return v.length;
+      return 0;
+    };
+    const immunCount = traitSize(actor.system?.traits?.di);
+    const resistCount = traitSize(actor.system?.traits?.dr);
+    const vulnCount = traitSize(actor.system?.traits?.dv);
+    const immunBonus = immunCount * 2;
+    const resistBonus = resistCount;
+    const vulnPenalty = -1 * vulnCount;
     const detectedMonsterFeatures = data.items.filter((item) => monsterFeatures[item.name]).map((item) => item.name);
     const monsterFeatureWeight = detectedMonsterFeatures.reduce(
       (total, featureName) => {
@@ -1039,8 +1052,8 @@ class CRCalculatorService {
       0
     );
     const monsterFeatureBonus = monsterFeatureWeight / 4;
-    const ac = actor.system.attributes.ac.value;
-    const hp = actor.system.attributes.hp.max;
+    const ac = actor.system?.attributes?.ac?.value ?? actor.system?.attributes?.ac?.flat ?? 10;
+    const hp = actor.system?.attributes?.hp?.max ?? 0;
     let defensiveCR = 0;
     challengeRatings.forEach((chall) => {
       if (hp >= chall.hit_points_min && hp <= chall.hit_points_max) {
@@ -1053,9 +1066,9 @@ class CRCalculatorService {
       breakdown: {
         hp,
         ac,
-        immunities: actor.system.traits.di.value.size,
-        resistances: actor.system.traits.dr.value.size,
-        vulnerabilities: actor.system.traits.dv.value.size,
+        immunities: immunCount,
+        resistances: resistCount,
+        vulnerabilities: vulnCount,
         monsterFeatures: detectedMonsterFeatures
       }
     };
@@ -1168,23 +1181,16 @@ class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     this.close();
   }
 }
-const version = "2.4.2";
+const version = "2.5.0";
 const packageInfo = {
   version
 };
-const buildNumber = 15;
+const buildNumber = 16;
 const buildInfo = {
   buildNumber
 };
 const shouldShowCRButton = (actorObject) => {
-  if (actorObject.type === "npc") {
-    if ((!actorObject.flags || Object.keys(actorObject.flags).length === 0) && (game.user?.isGM || game.user?.isTheGM)) {
-      return true;
-    } else if ((!actorObject.flags.core?.sheetClass || actorObject.flags.core.sheetClass === "" || actorObject.flags.core.sheetClass === "dnd5e.ActorSheet5eNPC" || actorObject.flags.core.sheetClass === "dnd5e.ActorSheet5eNPC2") && game.user?.isGM) {
-      return true;
-    }
-  }
-  return false;
+  return actorObject.type === "npc" && !!(game.user?.isGM || game.user?.isTheGM);
 };
 Hooks.once("init", async function() {
   console.log(
@@ -1235,59 +1241,144 @@ Hooks.once("ready", async function() {
 });
 const hookNames = [
   "renderNPCActorSheet",
-  // v13 ApplicationV2 name
+  // dnd5e 5.x ApplicationV2 NPC sheet
   "renderdnd5e.NPCActorSheet",
-  // With module prefix
+  // namespaced variant
   "renderActorSheet5eNPC2",
-  // Legacy name
-  "renderActorSheet"
-  // v12 fallback
+  // dnd5e 4.x ApplicationV2 NPC sheet
+  "renderActorSheet5eNPC",
+  // dnd5e ≤3.x legacy sheet
+  "renderActorSheet",
+  // generic Foundry fallback
+  "renderTidy5eNpcSheet",
+  // Tidy 5e Classic NPC sheet
+  "renderTidy5eNpcSheetQuadrone"
+  // Tidy 5e Quadrone NPC sheet
 ];
+function injectCRButton(actor, sheetElement) {
+  if (sheetElement.querySelector(".cr-calc-button")) {
+    return;
+  }
+  const windowHeader = sheetElement.querySelector(".window-header");
+  if (!windowHeader) return;
+  let headerDetails = null;
+  let insertMode = "append";
+  headerDetails = windowHeader.querySelector(".header-elements");
+  if (!headerDetails) {
+    const closeBtn = windowHeader.querySelector('button[data-action="close"], .close');
+    if (closeBtn) {
+      headerDetails = closeBtn;
+      insertMode = "before";
+    }
+  }
+  if (!headerDetails) {
+    headerDetails = windowHeader;
+  }
+  if (!headerDetails) {
+    headerDetails = sheetElement.querySelector(".header-details.flexrow");
+  }
+  if (!headerDetails) {
+    return;
+  }
+  const tooltip = game.i18n?.localize("CR-CALC.button-calc") || "Calculate CR";
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "cr-calc-button";
+  button.title = tooltip;
+  button.innerHTML = '<i class="fas fa-calculator"></i>&nbsp; CR Calc';
+  button.addEventListener("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    try {
+      const result = await CRCalculatorService.calculateCRForActor(actor, false);
+      const dialog = new CRCalculatorDialog(result, actor);
+      dialog.render(true);
+    } catch (error) {
+      console.error("Dorman Lakely's CR Calculator | Error calculating CR", error);
+      ui.notifications?.error(
+        `Error calculating CR: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { permanent: true }
+      );
+    }
+  });
+  if (insertMode === "before") {
+    headerDetails.parentElement?.insertBefore(button, headerDetails);
+  } else {
+    headerDetails.appendChild(button);
+  }
+}
+function getSheetElement(app, html) {
+  let el = html instanceof HTMLElement ? html : html?.[0] || null;
+  if (!el?.querySelector?.(".window-header")) {
+    const appEl = app.element;
+    if (appEl instanceof HTMLElement) {
+      el = appEl;
+    }
+  }
+  if (!el?.querySelector?.(".window-header") && el) {
+    const windowEl = el.closest(".application") || el.closest(".app");
+    if (windowEl instanceof HTMLElement) {
+      el = windowEl;
+    }
+  }
+  if (!el?.querySelector?.(".window-header") && app.id) {
+    const byId = document.getElementById(`app-${app.id}`) || document.getElementById(app.id) || document.querySelector(`[data-appid="${app.id}"]`);
+    if (byId instanceof HTMLElement) {
+      el = byId;
+    }
+  }
+  if (!el?.querySelector?.(".window-header")) {
+    const actor = app.document || app.object || app.actor;
+    if (actor?.name) {
+      const allWindows = document.querySelectorAll(".application .window-header .window-title");
+      for (const title of allWindows) {
+        if (title.textContent?.includes(actor.name)) {
+          const windowEl = title.closest(".application");
+          if (windowEl instanceof HTMLElement) {
+            el = windowEl;
+            break;
+          }
+        }
+      }
+    }
+  }
+  return el || null;
+}
 hookNames.forEach((hookName) => {
   Hooks.on(hookName, (app, html, data) => {
     const actor = app.document || app.object || app.actor;
-    if (!actor) {
-      return;
-    }
-    if (!shouldShowCRButton(actor)) {
-      return;
-    }
-    const sheetElement = html instanceof HTMLElement ? html : html[0];
-    if (!sheetElement) {
-      return;
-    }
-    let headerDetails = sheetElement.querySelector(".window-header .header-elements");
-    if (!headerDetails) {
-      headerDetails = sheetElement.querySelector(".header-details.flexrow");
-    }
-    if (!headerDetails) {
-      return;
-    }
-    if (headerDetails.querySelector(".cr-calc-button")) {
-      return;
-    }
-    const tooltip = game.i18n?.localize("CR-CALC.button-calc") || "Calculate CR";
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "cr-calc-button";
-    button.title = tooltip;
-    button.innerHTML = '<i class="fas fa-calculator"></i>&nbsp; CR Calc';
-    button.addEventListener("click", async (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      try {
-        const result = await CRCalculatorService.calculateCRForActor(actor, false);
-        const dialog = new CRCalculatorDialog(result, actor);
-        dialog.render(true);
-      } catch (error) {
-        console.error("CR Calculator: Error calculating CR", error);
-        ui.notifications?.error(
-          `Error calculating CR: ${error instanceof Error ? error.message : "Unknown error"}`,
-          { permanent: true }
-        );
-      }
-    });
-    headerDetails.appendChild(button);
+    if (!actor || !shouldShowCRButton(actor)) return;
+    const sheetElement = getSheetElement(app, html);
+    if (!sheetElement) return;
+    injectCRButton(actor, sheetElement);
   });
+});
+function scanForNPCSheets() {
+  const instances = foundry.applications?.instances;
+  if (!instances) return;
+  for (const [appId, app] of instances.entries()) {
+    const actor = app.document || app.object || app.actor;
+    if (!actor || !shouldShowCRButton(actor)) continue;
+    const el = app.element;
+    if (!(el instanceof HTMLElement)) continue;
+    if (el.querySelector(".cr-calc-button")) continue;
+    injectCRButton(actor, el);
+  }
+  if (ui.windows) {
+    for (const [appId, app] of Object.entries(ui.windows)) {
+      const actor = app.document || app.object || app.actor;
+      if (!actor || !shouldShowCRButton(actor)) continue;
+      const el = app.element instanceof HTMLElement ? app.element : app.element?.[0];
+      if (!(el instanceof HTMLElement)) continue;
+      if (el.querySelector(".cr-calc-button")) continue;
+      injectCRButton(actor, el);
+    }
+  }
+}
+Hooks.once("ready", () => {
+  new MutationObserver(() => {
+    clearTimeout(window.__crCalcScanTimeout);
+    window.__crCalcScanTimeout = setTimeout(scanForNPCSheets, 100);
+  }).observe(document.body, { childList: true, subtree: true });
 });
 //# sourceMappingURL=main.js.map

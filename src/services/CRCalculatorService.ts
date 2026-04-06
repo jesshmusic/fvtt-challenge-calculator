@@ -123,11 +123,17 @@ export class CRCalculatorService {
     };
   } {
     let spellSaveDC = 0;
-    if (actor.system.attributes.spellcasting && actor.system.attributes.spellcasting !== '') {
-      const castingAbilityMod = actor.system.abilities[actor.system.attributes.spellcasting].mod;
-      const spellLevelCR = challengeRatings.find(
-        (crObj) => crObj.cr === actor.system.details.spellLevel,
-      );
+    const spellcastingAbility = actor.system?.attributes?.spellcasting;
+    if (spellcastingAbility && spellcastingAbility !== '') {
+      const castingAbilityMod = actor.system?.abilities?.[spellcastingAbility]?.mod ?? 0;
+      // dnd5e 5.x moved details.spellLevel to attributes.spell.level during data prep.
+      // Fall back to details.spellLevel for dnd5e 4.x, then to details.cr as a last resort
+      // (NPC spell save DC scales with CR/proficiency bonus regardless).
+      const spellLevel =
+        actor.system?.attributes?.spell?.level ??
+        actor.system?.details?.spellLevel ??
+        actor.system?.details?.cr;
+      const spellLevelCR = challengeRatings.find((crObj) => crObj.cr === spellLevel);
       if (spellLevelCR) {
         spellSaveDC = 8 + castingAbilityMod + spellLevelCR.prof_bonus;
       }
@@ -136,9 +142,9 @@ export class CRCalculatorService {
     const numFeats = data.items.filter((item: any) => item.type === 'feat').length;
     const featsBonus = numFeats > 0 ? numFeats / 3 : 0;
 
-    let damageBonus = actor.system.abilities.str.mod;
+    let damageBonus = actor.system?.abilities?.str?.mod ?? 0;
     let numAttacks = 1;
-    let attackBonus = actor.system.abilities.str.mod;
+    let attackBonus = actor.system?.abilities?.str?.mod ?? 0;
 
     const damageCalc = this.calculateDamagePerRound(
       data,
@@ -337,16 +343,14 @@ export class CRCalculatorService {
             ? item.system.properties.has('fin')
             : 'fin' in (item.system.properties || {});
 
-        const atkBonus =
-          hasFinesseProperty && actor.system.abilities.dex.mod > actor.system.abilities.str.mod
-            ? actor.system.abilities.dex.mod
-            : attackBonus;
+        const dexMod = actor.system?.abilities?.dex?.mod ?? 0;
+        const strMod = actor.system?.abilities?.str?.mod ?? 0;
+        const useFinesse = hasFinesseProperty && dexMod > strMod;
+
+        const atkBonus = useFinesse ? dexMod : attackBonus;
         attackBonus = atkBonus > attackBonus ? atkBonus : attackBonus;
 
-        const dmgBonus =
-          hasFinesseProperty && actor.system.abilities.dex.mod > actor.system.abilities.str.mod
-            ? actor.system.abilities.dex.mod
-            : damageBonus;
+        const dmgBonus = useFinesse ? dexMod : damageBonus;
         damageBonus = dmgBonus > damageBonus ? dmgBonus : damageBonus;
 
         const isFeat = item.type === 'feat';
@@ -442,9 +446,21 @@ export class CRCalculatorService {
       monsterFeatures: string[];
     };
   } {
-    const immunBonus = actor.system.traits.di.value.size * 2;
-    const resistBonus = actor.system.traits.dr.value.size;
-    const vulnPenalty = -1 * actor.system.traits.dv.value.size;
+    // dnd5e stores damage immunities/resistances/vulnerabilities as a Set, but
+    // older data and some edge cases may have arrays or be undefined entirely.
+    const traitSize = (trait: any): number => {
+      const v = trait?.value;
+      if (!v) return 0;
+      if (typeof v.size === 'number') return v.size; // Set
+      if (Array.isArray(v)) return v.length; // Array
+      return 0;
+    };
+    const immunCount = traitSize(actor.system?.traits?.di);
+    const resistCount = traitSize(actor.system?.traits?.dr);
+    const vulnCount = traitSize(actor.system?.traits?.dv);
+    const immunBonus = immunCount * 2;
+    const resistBonus = resistCount;
+    const vulnPenalty = -1 * vulnCount;
 
     // Calculate weighted CR bonus from monster features
     const detectedMonsterFeatures = data.items
@@ -472,8 +488,12 @@ export class CRCalculatorService {
     // Convert weight to CR bonus (weight of 4 = +1 CR)
     const monsterFeatureBonus = monsterFeatureWeight / 4;
 
-    const ac = actor.system.attributes.ac.value;
-    const hp = actor.system.attributes.hp.max;
+    // ac.value is computed during data preparation; fall back through flat → 10.
+    const ac =
+      actor.system?.attributes?.ac?.value ??
+      actor.system?.attributes?.ac?.flat ??
+      10;
+    const hp = actor.system?.attributes?.hp?.max ?? 0;
 
     let defensiveCR = 0;
     challengeRatings.forEach((chall) => {
@@ -489,9 +509,9 @@ export class CRCalculatorService {
       breakdown: {
         hp,
         ac,
-        immunities: actor.system.traits.di.value.size,
-        resistances: actor.system.traits.dr.value.size,
-        vulnerabilities: actor.system.traits.dv.value.size,
+        immunities: immunCount,
+        resistances: resistCount,
+        vulnerabilities: vulnCount,
         monsterFeatures: detectedMonsterFeatures,
       },
     };
