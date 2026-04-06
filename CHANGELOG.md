@@ -5,6 +5,20 @@ All notable changes to Dorman Lakely's 5e CR Calculator will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-04-06
+
+### Added
+
+- Foundry VTT v14 compatibility (`compatibility.verified` bumped to `14`). **Minimum Foundry version bumped to 14**. Earlier versions of this module remain available for v13 users from the GitHub releases page; this version is v14-only by design.
+- dnd5e 5.x support: spell save DC lookup now reads `actor.system.attributes.spell.level` (the dnd5e 5.x location after data preparation), falling back to `system.details.spellLevel` (dnd5e 4.x) and finally to `system.details.cr`. Spellcasting NPCs no longer silently report a spell save DC of 0 on dnd5e 5.x.
+- Render hook list now also tries `renderActorSheet5eNPC` for older dnd5e versions.
+
+### Changed
+
+- Defensive optional chaining around all dnd5e actor system reads (`abilities.*.mod`, `attributes.hp.max`, `attributes.ac.value`, `attributes.spellcasting`, `traits.di/dr/dv.value`). Calculations no longer crash if a field is missing on a partially-prepared actor; they fall back to safe defaults.
+- AC reads now fall back through `attributes.ac.value` → `attributes.ac.flat` → `10` so the calculator works against unprepared compendium actors.
+- Damage immunity / resistance / vulnerability counting handles both `Set` and `Array` shapes (dnd5e historically used both) and gracefully no-ops when the trait field is undefined.
+
 ## [2.4.3] - 2026-03-24
 
 ### Added

@@ -79,12 +79,15 @@ Hooks.once('ready', async function () {
  * v13 ApplicationV2 uses: render<ClassName>
  */
 
-// Try all possible v13 hook names (including Tidy 5e sheet variants)
+// Try all possible hook names across Foundry v12/v13/v14 + dnd5e 4.x/5.x
+// (including Tidy 5e sheet variants). Foundry's render hook fires as
+// "render<ClassName>"; dnd5e 5.x renamed the NPC sheet to NPCActorSheet.
 const hookNames = [
-  'renderNPCActorSheet', // v13 ApplicationV2 name
-  'renderdnd5e.NPCActorSheet', // With module prefix
-  'renderActorSheet5eNPC2', // Legacy name
-  'renderActorSheet', // v12 fallback
+  'renderNPCActorSheet', // dnd5e 5.x ApplicationV2 NPC sheet
+  'renderdnd5e.NPCActorSheet', // namespaced variant
+  'renderActorSheet5eNPC2', // dnd5e 4.x ApplicationV2 NPC sheet
+  'renderActorSheet5eNPC', // dnd5e ≤3.x legacy sheet
+  'renderActorSheet', // generic Foundry fallback
   'renderTidy5eNpcSheet', // Tidy 5e Classic NPC sheet
   'renderTidy5eNpcSheetQuadrone', // Tidy 5e Quadrone NPC sheet
 ];
