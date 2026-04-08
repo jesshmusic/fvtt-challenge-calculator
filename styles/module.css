@@ -295,3 +295,55 @@
 .cr-calculator .form-footer button:active {
   transform: translateY(0);
 }
+
+/* ============================================
+   Dungeon Master Guru cross-promotion card
+   ============================================ */
+
+.cr-calculator .cr-calc-dmguru-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 320px;
+  margin: 1rem auto 0;
+  padding: 12px 16px;
+  background: #f9f1dc;
+  color: #5b1d12;
+  border: 1px solid #645e56;
+  border-radius: 4px;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.cr-calculator .cr-calc-dmguru-link:hover,
+.cr-calculator .cr-calc-dmguru-link:focus-visible {
+  background: #ece1c0;
+  color: #9a2d1e;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+  outline: 2px solid #645e56;
+  outline-offset: 2px;
+}
+
+.cr-calculator .cr-calc-dmguru-logo {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.cr-calculator .cr-calc-dmguru-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cr-calculator .cr-calc-dmguru-text strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.cr-calculator .cr-calc-dmguru-text span {
+  font-size: 0.78rem;
+  color: #645e56;
+}
