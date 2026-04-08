@@ -1208,7 +1208,7 @@ class PatreonLink extends ApplicationV2 {
       ok: {
         label: '<i class="fab fa-patreon"></i> Visit Patreon',
         callback: () => {
-          window.open("https://patreon.com/jesshmusic", "_blank", "noopener,noreferrer");
+          window.open("https://www.patreon.com/c/DormanLakely", "_blank", "noopener,noreferrer");
         }
       }
     });
@@ -1251,7 +1251,7 @@ const version = "2.5.1";
 const packageInfo = {
   version
 };
-const buildNumber = 18;
+const buildNumber = 19;
 const buildInfo = {
   buildNumber
 };
