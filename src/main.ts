@@ -1,8 +1,11 @@
 import { CRCalculatorService } from './services/CRCalculatorService.js';
 import { CRCalculatorDialog } from './ui/CRCalculatorDialog.js';
 import { challengeRatings, monsterFeatures } from './data/crData.js';
+import { PatreonLink, DmGuruLink } from './settings/settings-menus.js';
 import packageInfo from '../package.json';
 import buildInfo from '../build-info.json';
+
+const MODULE_ID = 'fvtt-challenge-calculator';
 
 /**
  * Check if the CR button should be shown for this actor
@@ -26,6 +29,24 @@ Hooks.once('init', async function () {
     'color: #ff9800; font-weight: bold; font-size: 14px;',
     'color: #ffeb3b; font-weight: normal; font-size: 12px;',
   );
+
+  game.settings.registerMenu(MODULE_ID, 'patreonLink', {
+    name: 'Support on Patreon',
+    label: 'Visit Patreon',
+    hint: 'Support the development of this module on Patreon! Your contributions help fund new features and updates.',
+    icon: 'fab fa-patreon',
+    type: PatreonLink as any,
+    restricted: true,
+  });
+
+  game.settings.registerMenu(MODULE_ID, 'dmGuruLink', {
+    name: 'Dungeon Master Guru',
+    label: 'Visit Dungeon Master Guru',
+    hint: 'SRD rules and DM tools. Free resources for Dungeon Masters at dungeonmaster.guru.',
+    icon: 'fas fa-dragon',
+    type: DmGuruLink as any,
+    restricted: true,
+  });
 });
 
 Hooks.once('ready', async function () {
