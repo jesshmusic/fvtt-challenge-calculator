@@ -1074,8 +1074,8 @@ class CRCalculatorService {
     };
   }
 }
-const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
-class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2) {
+const { ApplicationV2: ApplicationV2$1, HandlebarsApplicationMixin } = foundry.applications.api;
+class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2$1) {
   result;
   actor;
   constructor(result, actor) {
@@ -1181,14 +1181,81 @@ class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     this.close();
   }
 }
+const { ApplicationV2 } = foundry.applications.api;
+const DialogV2 = foundry.applications.api.DialogV2;
+class PatreonLink extends ApplicationV2 {
+  static DEFAULT_OPTIONS = {
+    id: "cr-calculator-patreon-link",
+    classes: [],
+    tag: "div",
+    window: {
+      title: "Support on Patreon",
+      icon: "fab fa-patreon"
+    },
+    position: { width: 1, height: 1 }
+  };
+  async _renderHTML() {
+    return document.createElement("div");
+  }
+  _replaceHTML(result, content) {
+    content.replaceChildren(result);
+  }
+  async _onFirstRender(_context, _options) {
+    this.element?.style?.setProperty("display", "none");
+    await DialogV2.prompt({
+      window: { title: "Support on Patreon" },
+      content: "<p>Open the Patreon page in a new tab.</p>",
+      ok: {
+        label: '<i class="fab fa-patreon"></i> Visit Patreon',
+        callback: () => {
+          window.open("https://patreon.com/jesshmusic", "_blank", "noopener,noreferrer");
+        }
+      }
+    });
+    this.close();
+  }
+}
+class DmGuruLink extends ApplicationV2 {
+  static DEFAULT_OPTIONS = {
+    id: "cr-calculator-dmguru-link",
+    classes: [],
+    tag: "div",
+    window: {
+      title: "Dungeon Master Guru",
+      icon: "fas fa-dragon"
+    },
+    position: { width: 1, height: 1 }
+  };
+  async _renderHTML() {
+    return document.createElement("div");
+  }
+  _replaceHTML(result, content) {
+    content.replaceChildren(result);
+  }
+  async _onFirstRender(_context, _options) {
+    this.element?.style?.setProperty("display", "none");
+    await DialogV2.prompt({
+      window: { title: "Dungeon Master Guru" },
+      content: "<p>Open the Dungeon Master Guru site in a new tab.</p>",
+      ok: {
+        label: '<i class="fas fa-dragon"></i> Visit Dungeon Master Guru',
+        callback: () => {
+          window.open("https://dungeonmaster.guru", "_blank", "noopener,noreferrer");
+        }
+      }
+    });
+    this.close();
+  }
+}
 const version = "2.5.1";
 const packageInfo = {
   version
 };
-const buildNumber = 17;
+const buildNumber = 18;
 const buildInfo = {
   buildNumber
 };
+const MODULE_ID = "fvtt-challenge-calculator";
 const shouldShowCRButton = (actorObject) => {
   return actorObject.type === "npc" && !!(game.user?.isGM || game.user?.isTheGM);
 };
@@ -1199,6 +1266,22 @@ Hooks.once("init", async function() {
     "color: #ff9800; font-weight: bold; font-size: 14px;",
     "color: #ffeb3b; font-weight: normal; font-size: 12px;"
   );
+  game.settings.registerMenu(MODULE_ID, "patreonLink", {
+    name: "Support on Patreon",
+    label: "Visit Patreon",
+    hint: "Support the development of this module on Patreon! Your contributions help fund new features and updates.",
+    icon: "fab fa-patreon",
+    type: PatreonLink,
+    restricted: true
+  });
+  game.settings.registerMenu(MODULE_ID, "dmGuruLink", {
+    name: "Dungeon Master Guru",
+    label: "Visit Dungeon Master Guru",
+    hint: "SRD rules and DM tools. Free resources for Dungeon Masters at dungeonmaster.guru.",
+    icon: "fas fa-dragon",
+    type: DmGuruLink,
+    restricted: true
+  });
 });
 Hooks.once("ready", async function() {
   console.log(
