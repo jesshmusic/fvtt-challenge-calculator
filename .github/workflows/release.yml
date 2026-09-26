@@ -34,7 +34,7 @@ jobs:
         run: npm run build
 
       - name: Create module archive
-        run: zip -r ./module.zip module.json README.md LICENSE styles/ templates/ languages/ scripts/
+        run: zip -r ./module.zip module.json README.md LICENSE styles/ templates/ languages/ scripts/ icons/
 
       - name: Create git tag
         run: |
@@ -73,23 +73,28 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           REPO: ${{ github.repository }}
         run: |
+          # Build the payload from module.json so id/compatibility can't drift from the manifest
+          PAYLOAD=$(jq -c \
+            --arg version "$VERSION" \
+            --arg manifest "https://github.com/${REPO}/releases/download/v${VERSION}/module.json" \
+            --arg notes "https://github.com/${REPO}/releases/tag/v${VERSION}" \
+            '{
+              id: .id,
+              "dry-run": false,
+              release: {
+                version: $version,
+                manifest: $manifest,
+                notes: $notes,
+                compatibility: (.compatibility | with_entries(select(.key | IN("minimum", "verified", "maximum")) | .value |= tostring))
+              }
+            }' module.json)
+          echo "Payload: $PAYLOAD"
+
           RESPONSE=$(curl -X POST https://foundryvtt.com/_api/packages/release_version/ \
             -w "\n%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Authorization: ${FOUNDRY_TOKEN}" \
-            -d "{
-              \"id\": \"fvtt-challenge-calculator\",
-              \"dry-run\": false,
-              \"release\": {
-                \"version\": \"${VERSION}\",
-                \"manifest\": \"https://github.com/${REPO}/releases/download/v${VERSION}/module.json\",
-                \"notes\": \"https://github.com/${REPO}/releases/tag/v${VERSION}\",
-                \"compatibility\": {
-                  \"minimum\": \"13\",
-                  \"verified\": \"13\"
-                }
-              }
-            }")
+            -d "$PAYLOAD")
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | sed '$d')

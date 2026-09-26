@@ -1181,6 +1181,21 @@ class CRCalculatorDialog extends HandlebarsApplicationMixin(ApplicationV2$1) {
     this.close();
   }
 }
+const shouldShowCRButton = (actorObject) => {
+  return actorObject?.type === "npc" && !!(game.user?.isGM || game.user?.isTheGM);
+};
+const isDocumentSheet = (app) => {
+  const DocumentSheetV2 = foundry.applications?.api?.DocumentSheetV2;
+  const DocumentSheetV1 = foundry.appv1?.api?.DocumentSheet;
+  return typeof DocumentSheetV2 === "function" && app instanceof DocumentSheetV2 || typeof DocumentSheetV1 === "function" && app instanceof DocumentSheetV1;
+};
+function getSheetActor(app) {
+  if (!app || app instanceof CRCalculatorDialog) return null;
+  if (!isDocumentSheet(app)) return null;
+  const doc = app.document;
+  if (doc?.documentName !== "Actor") return null;
+  return shouldShowCRButton(doc) ? doc : null;
+}
 const { ApplicationV2 } = foundry.applications.api;
 const DialogV2 = foundry.applications.api.DialogV2;
 class PatreonLink extends ApplicationV2 {
@@ -1251,14 +1266,11 @@ const version = "2.5.1";
 const packageInfo = {
   version
 };
-const buildNumber = 19;
+const buildNumber = 20;
 const buildInfo = {
   buildNumber
 };
 const MODULE_ID = "fvtt-challenge-calculator";
-const shouldShowCRButton = (actorObject) => {
-  return actorObject.type === "npc" && !!(game.user?.isGM || game.user?.isTheGM);
-};
 Hooks.once("init", async function() {
   console.log(
     "%c⚔️ Dorman Lakely's 5e CR Calculator %cv" + packageInfo.version + " %c(build " + buildInfo.buildNumber + ")",
@@ -1429,8 +1441,8 @@ function getSheetElement(app, html) {
 }
 hookNames.forEach((hookName) => {
   Hooks.on(hookName, (app, html, data) => {
-    const actor = app.document || app.object || app.actor;
-    if (!actor || !shouldShowCRButton(actor)) return;
+    const actor = getSheetActor(app);
+    if (!actor) return;
     const sheetElement = getSheetElement(app, html);
     if (!sheetElement) return;
     injectCRButton(actor, sheetElement);
@@ -1439,18 +1451,18 @@ hookNames.forEach((hookName) => {
 function scanForNPCSheets() {
   const instances = foundry.applications?.instances;
   if (!instances) return;
-  for (const [appId, app] of instances.entries()) {
-    const actor = app.document || app.object || app.actor;
-    if (!actor || !shouldShowCRButton(actor)) continue;
+  for (const app of instances.values()) {
+    const actor = getSheetActor(app);
+    if (!actor) continue;
     const el = app.element;
     if (!(el instanceof HTMLElement)) continue;
     if (el.querySelector(".cr-calc-button")) continue;
     injectCRButton(actor, el);
   }
   if (ui.windows) {
-    for (const [appId, app] of Object.entries(ui.windows)) {
-      const actor = app.document || app.object || app.actor;
-      if (!actor || !shouldShowCRButton(actor)) continue;
+    for (const app of Object.values(ui.windows)) {
+      const actor = getSheetActor(app);
+      if (!actor) continue;
       const el = app.element instanceof HTMLElement ? app.element : app.element?.[0];
       if (!(el instanceof HTMLElement)) continue;
       if (el.querySelector(".cr-calc-button")) continue;
