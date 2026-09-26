@@ -1,19 +1,12 @@
 import { CRCalculatorService } from './services/CRCalculatorService.js';
 import { CRCalculatorDialog } from './ui/CRCalculatorDialog.js';
+import { getSheetActor } from './ui/sheet-detection.js';
 import { challengeRatings, monsterFeatures } from './data/crData.js';
 import { PatreonLink, DmGuruLink } from './settings/settings-menus.js';
 import packageInfo from '../package.json';
 import buildInfo from '../build-info.json';
 
 const MODULE_ID = 'fvtt-challenge-calculator';
-
-/**
- * Check if the CR button should be shown for this actor
- * Shows for any NPC sheet when user is GM (supports default, Tidy 5e, and other custom sheets)
- */
-const shouldShowCRButton = (actorObject: any): boolean => {
-  return actorObject.type === 'npc' && !!(game.user?.isGM || (game.user as any)?.isTheGM);
-};
 
 /**
  * Module initialization
@@ -250,8 +243,8 @@ function getSheetElement(app: any, html: JQuery | HTMLElement | undefined): HTML
 // Standard Foundry render hooks
 hookNames.forEach((hookName) => {
   Hooks.on(hookName, (app: any, html: JQuery | HTMLElement, data?: any) => {
-    const actor = app.document || app.object || app.actor;
-    if (!actor || !shouldShowCRButton(actor)) return;
+    const actor = getSheetActor(app);
+    if (!actor) return;
 
     const sheetElement = getSheetElement(app, html);
     if (!sheetElement) return;
@@ -262,7 +255,8 @@ hookNames.forEach((hookName) => {
 
 /**
  * Scan all open application windows for NPC sheets that need the CR button.
- * Works with any sheet module (Tidy 5e, custom sheets, etc.)
+ * Works with any sheet module (Tidy 5e, custom sheets, etc.) as long as it is a
+ * Foundry document sheet for an Actor; see getSheetActor.
  */
 function scanForNPCSheets(): void {
   // v13 ApplicationV2: foundry.applications.instances is a Map<string, Application>
@@ -270,9 +264,9 @@ function scanForNPCSheets(): void {
   const instances = foundry.applications?.instances;
   if (!instances) return;
 
-  for (const [appId, app] of (instances as Map<string, any>).entries()) {
-    const actor = (app as any).document || (app as any).object || (app as any).actor;
-    if (!actor || !shouldShowCRButton(actor)) continue;
+  for (const app of (instances as Map<string, any>).values()) {
+    const actor = getSheetActor(app);
+    if (!actor) continue;
 
     const el = (app as any).element;
     if (!(el instanceof HTMLElement)) continue;
@@ -283,9 +277,9 @@ function scanForNPCSheets(): void {
 
   // v12 fallback: check ui.windows
   if (ui.windows) {
-    for (const [appId, app] of Object.entries(ui.windows) as any[]) {
-      const actor = app.document || app.object || app.actor;
-      if (!actor || !shouldShowCRButton(actor)) continue;
+    for (const app of Object.values(ui.windows) as any[]) {
+      const actor = getSheetActor(app);
+      if (!actor) continue;
 
       const el = app.element instanceof HTMLElement ? app.element : app.element?.[0];
       if (!(el instanceof HTMLElement)) continue;
