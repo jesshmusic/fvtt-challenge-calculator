@@ -1,4 +1,4 @@
-![](https://img.shields.io/badge/Foundry-v13-informational)
+![](https://img.shields.io/badge/Foundry-v14-informational)
 ![Latest Release Download Count](https://img.shields.io/github/downloads/jesshmusic/fvtt-challenge-calculator/latest/module.zip)
 
 # Dorman Lakely's 5e CR Calculator
@@ -64,7 +64,7 @@ https://github.com/jesshmusic/fvtt-challenge-calculator/raw/master/media/cr-calc
 
 ## Requirements
 
-- **FoundryVTT**: Version 13 or higher
+- **FoundryVTT**: Version 14 or higher
 - **D&D 5e System**: Required (this module only works with the dnd5e system)
 - **GM Access**: Only Game Masters can see and use the CR Calc button
 
