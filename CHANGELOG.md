@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - DM Guru logo 404 in the CR Calculator dialog: the release workflows (`auto-release.yml`, `release.yml`) now include `icons/` in `module.zip`, so `icons/dmguru-logo.svg` ships with the module.
 - The CR Calc button no longer injects itself into the CR Calculator results dialog. Button injection (render hooks and the MutationObserver scan) is now limited to Foundry document sheets (`DocumentSheetV2` or AppV1 `DocumentSheet`) whose document is an NPC `Actor`, which also excludes item sheets owned by NPCs.
+- Release workflows reported `compatibility` 13/13 to the Foundry package release API while `module.json` requires v14. The payload is now built with `jq` from `module.json` (`id`, `compatibility.minimum/verified/maximum`), so it can't drift from the manifest.
 
 ## [2.5.1] - 2026-04-08
 
