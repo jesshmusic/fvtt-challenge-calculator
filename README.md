@@ -11,12 +11,11 @@ https://github.com/jesshmusic/fvtt-challenge-calculator/raw/master/media/cr-calc
 
 - **Automatic CR Calculation**: Click a button on any NPC sheet to calculate their CR
 - **Detailed Breakdown Dialog**: View defensive and offensive CR calculations separately
-- **DMG-Accurate**: Uses official Challenge Rating tables from the Dungeon Master's Guide
+- **DMG Method, 2024 Stats**: Follows the Dungeon Master's Guide CR procedure, measured against the stat baselines of the 2024 Monster Manual (dnd5e 5.x / 6.x)
 - **Smart Analysis**:
-  - Analyzes HP, AC, damage immunities, resistances, and vulnerabilities
-  - Detects multiattack and calculates damage per round
-  - Recognizes special monster features (Pack Tactics, Magic Resistance, etc.)
-  - Handles finesse weapons and spellcasting
+  - Reads dnd5e activities: attack, save and damage activities, base weapon damage, versatile and finesse weapons, cantrip and upcast scaling
+  - Parses Multiattack (including `[[/item ...]]` references), recharge and limited-use abilities, spells cast through Spellcasting, and legendary actions
+  - Applies effective HP for physical resistances/immunities and effective AC for Magic Resistance
 - **Modern UI**: Beautiful ApplicationV2 dialog with detailed calculation breakdown
 - **TypeScript**: Built with TypeScript for reliability and maintainability
 
@@ -44,23 +43,15 @@ https://github.com/jesshmusic/fvtt-challenge-calculator/raw/master/media/cr-calc
 
 ### What Gets Analyzed
 
-**Defensive CR:**
+The calculator follows the DMG "Creating a Monster" procedure on the CR ladder (0, 1/8, 1/4, 1/2, 1 ... 30):
 
-- Hit Points
-- Armor Class
-- Damage Immunities (×2 bonus each)
-- Damage Resistances (×1 bonus each)
-- Damage Vulnerabilities (-1 penalty each)
-- Special monster features (from DMG list)
+**Defensive CR:** the CR whose expected hit points match the monster's effective HP, then one CR step per 4 points of effective AC above or below the expected AC. Resistance or immunity to bludgeoning, piercing or slashing damage raises effective HP by the DMG multipliers for the CR band; Magic Resistance counts as +2 AC.
 
-**Offensive CR:**
+**Offensive CR:** the CR whose expected damage per round matches the monster's three-round average DPR, then one CR step per 4 points of attack bonus (or save DC, for monsters that deal their damage through saves) above or below expected. DPR uses the best at-will routine (Multiattack or a single action), spends recharge/limited abilities once each when they beat it, and adds bonus-action, start/end-of-turn and legendary-action damage.
 
-- Damage per round from all weapons/attacks
-- Number of attacks (detects Multiattack)
-- Attack bonus
-- Spell save DC (for spellcasters)
-- Number of feats (bonus scaling)
-- Finesse weapon detection (uses DEX if higher than STR)
+**Final CR:** the average of the two, rounded to the nearest CR.
+
+The expected values per CR (`src/data/crBaselines.ts`) are medians of the 504 creatures in the 2024 Monster Manual, not the DMG 2014 table, whose hit points run two to three times higher than published stat blocks. On those 504 creatures the calculated CR matches the listed CR exactly about 54% of the time and is within 1 about 94% of the time (cross-validated).
 
 ## Requirements
 
@@ -70,9 +61,9 @@ https://github.com/jesshmusic/fvtt-challenge-calculator/raw/master/media/cr-calc
 
 ## Known Limitations
 
-- Damage parsing may fail on unusual dice expressions (errors are reported to chat)
-- Does not account for legendary actions or lair actions
-- CR 0 creatures may not calculate accurately due to minimal stats
+- Control effects without damage (paralysis, charm, banishment) and utility spells are not counted, so control-heavy casters can come out low
+- Lair actions are not counted
+- Multiattack text is parsed heuristically; unusual phrasing falls back to the best single action
 
 ## Changelog
 

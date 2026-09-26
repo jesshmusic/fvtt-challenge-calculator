@@ -2,6 +2,7 @@ import { CRCalculatorService } from './services/CRCalculatorService.js';
 import { CRCalculatorDialog } from './ui/CRCalculatorDialog.js';
 import { getSheetActor } from './ui/sheet-detection.js';
 import { challengeRatings, monsterFeatures } from './data/crData.js';
+import { CR_BASELINES_2024 } from './data/crBaselines.js';
 import { PatreonLink, DmGuruLink } from './settings/settings-menus.js';
 import packageInfo from '../package.json';
 import buildInfo from '../build-info.json';
@@ -62,13 +63,19 @@ Hooks.once('ready', async function () {
       calculateCRForActor: CRCalculatorService.calculateCRForActor.bind(CRCalculatorService),
 
       /**
-       * Array of challenge rating data from DMG
+       * Expected stats per CR (2024 Monster Manual) used by the calculation
+       * @type {CRBaseline[]}
+       */
+      crBaselines: CR_BASELINES_2024,
+
+      /**
+       * Array of challenge rating data from DMG (2014 reference table)
        * @type {ChallengeRating[]}
        */
       challengeRatings,
 
       /**
-       * Dictionary of monster features with CR weights
+       * Dictionary of monster features with CR weights (deprecated: not used by the calculation)
        * @type {Record<string, MonsterFeature>}
        */
       monsterFeatures,
