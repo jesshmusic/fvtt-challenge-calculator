@@ -1,6 +1,6 @@
 {
   "name": "fvtt-challenge-calculator",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "description": "Dorman Lakely's 5e CR Calculator for FoundryVTT",
   "main": "scripts/main.js",
   "scripts": {
@@ -14,6 +14,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "eval:cr": "jest tests/crEvaluation.test.ts --coverage=false",
     "release:patch": "node .github/scripts/release.js patch",
     "release:minor": "node .github/scripts/release.js minor",
     "release:major": "node .github/scripts/release.js major"

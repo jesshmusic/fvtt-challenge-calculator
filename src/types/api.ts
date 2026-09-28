@@ -15,6 +15,7 @@
 
 import type { CRCalculationResult } from '../services/CRCalculatorService.js';
 import type { ChallengeRating, MonsterFeature } from '../data/crData.js';
+import type { CRBaseline } from '../services/crMath.js';
 
 /**
  * Public API exposed by the CR Calculator module
@@ -38,7 +39,14 @@ export interface CRCalculatorAPI {
   calculateCRForActor(actor: any, updateActor?: boolean): Promise<CRCalculationResult>;
 
   /**
-   * Array of challenge rating data from D&D 5e Dungeon Master's Guide
+   * Expected monster stats per CR used by the calculation, derived from the 2024
+   * Monster Manual: effective HP, effective AC, attack bonus, save DC and
+   * three-round damage per round, one row per CR (0, 1/8, 1/4, 1/2, 1 ... 30).
+   */
+  crBaselines: CRBaseline[];
+
+  /**
+   * Array of challenge rating data from D&D 5e Dungeon Master's Guide (2014, reference only)
    * Contains CR values from 0 to 30 with corresponding XP, proficiency bonus,
    * AC, HP ranges, attack bonus, damage ranges, and save DC
    *
@@ -51,6 +59,8 @@ export interface CRCalculatorAPI {
   challengeRatings: ChallengeRating[];
 
   /**
+   * @deprecated Since 2.6.0 the calculation does not use these weights.
+   *
    * Dictionary of monster features with CR weight adjustments
    * Keys are feature names, values are MonsterFeature objects with:
    * - name: Feature name
@@ -85,4 +95,4 @@ export interface CRCalculatorAPI {
 }
 
 // Re-export types for external modules
-export type { CRCalculationResult, ChallengeRating, MonsterFeature };
+export type { CRCalculationResult, ChallengeRating, MonsterFeature, CRBaseline };

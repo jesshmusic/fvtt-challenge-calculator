@@ -47,11 +47,11 @@
     <div class="details-grid">
       <div class="detail-item">
         <label>Hit Points</label>
-        <span>{{defensive.hp}}</span>
+        <span>{{defensive.hp}}{{#if defensive.hasEffectiveHP}} (effective {{defensive.effectiveHP}}){{/if}}</span>
       </div>
       <div class="detail-item">
         <label>Armor Class</label>
-        <span>{{defensive.ac}}</span>
+        <span>{{defensive.ac}}{{#if defensive.hasEffectiveAC}} (effective {{defensive.effectiveAC}}){{/if}}</span>
       </div>
       <div class="detail-item">
         <label>Immunities</label>
@@ -69,7 +69,7 @@
 
     {{#if defensive.hasFeatures}}
       <div class="feature-list">
-        <label>Detected Monster Features:</label>
+        <label>Defensive Adjustments:</label>
         <ul>
           {{#each defensive.monsterFeatures}}
             <li>{{this}}</li>
@@ -84,7 +84,7 @@
     <h3><i class="fas fa-sword"></i> Offensive Breakdown</h3>
     <div class="details-grid">
       <div class="detail-item">
-        <label>Damage Per Round</label>
+        <label>Damage Per Round (3-round avg)</label>
         <span>{{offensive.dpr}}</span>
       </div>
       <div class="detail-item">
@@ -97,19 +97,21 @@
       </div>
       {{#if offensive.hasSpells}}
         <div class="detail-item">
-          <label>Spell Save DC</label>
+          <label>Save DC{{#if offensive.usesSaveDC}} (used){{/if}}</label>
           <span>{{offensive.spellSaveDC}}</span>
         </div>
       {{/if}}
-      <div class="detail-item">
-        <label>Number of Feats</label>
-        <span>{{offensive.numFeats}}</span>
-      </div>
+      {{#if offensive.legendaryActions}}
+        <div class="detail-item">
+          <label>Legendary Actions</label>
+          <span>{{offensive.legendaryActions}}</span>
+        </div>
+      {{/if}}
     </div>
 
     {{#if offensive.hasWeapons}}
       <div class="feature-list">
-        <label>Detected Weapons/Attacks:</label>
+        <label>Damage Sources:</label>
         <ul>
           {{#each offensive.detectedWeapons}}
             <li>{{this}}</li>

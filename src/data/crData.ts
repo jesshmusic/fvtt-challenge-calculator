@@ -1,5 +1,8 @@
 /**
- * Challenge Rating data structures and tables from the D&D 5e Dungeon Master's Guide
+ * Challenge Rating reference data from the D&D 5e Dungeon Master's Guide (2014).
+ *
+ * The calculation itself uses the 2024 baselines in `crBaselines.ts`; this DMG
+ * table is kept for the public API and as a reference.
  */
 
 export interface ChallengeRating {
@@ -36,7 +39,7 @@ export const challengeRatings: ChallengeRating[] = [
     hit_points_min: 7,
     hit_points_max: 35,
     attack_bonus: 3,
-    damage_min: 0,
+    damage_min: 2,
     damage_max: 3,
     save_dc: 13,
   },
@@ -48,7 +51,7 @@ export const challengeRatings: ChallengeRating[] = [
     hit_points_min: 36,
     hit_points_max: 49,
     attack_bonus: 3,
-    damage_min: 0,
+    damage_min: 4,
     damage_max: 5,
     save_dc: 13,
   },
@@ -60,7 +63,7 @@ export const challengeRatings: ChallengeRating[] = [
     hit_points_min: 50,
     hit_points_max: 70,
     attack_bonus: 3,
-    damage_min: 0,
+    damage_min: 6,
     damage_max: 8,
     save_dc: 13,
   },
@@ -206,7 +209,7 @@ export const challengeRatings: ChallengeRating[] = [
     attack_bonus: 8,
     damage_min: 75,
     damage_max: 80,
-    save_dc: 18,
+    save_dc: 17,
   },
   {
     cr: 13,
@@ -347,7 +350,7 @@ export const challengeRatings: ChallengeRating[] = [
     armor_class: 19,
     hit_points_min: 536,
     hit_points_max: 580,
-    attack_bonus: 11,
+    attack_bonus: 12,
     damage_min: 195,
     damage_max: 212,
     save_dc: 21,
@@ -405,7 +408,7 @@ export const challengeRatings: ChallengeRating[] = [
     xp: 135000,
     prof_bonus: 9,
     armor_class: 19,
-    hit_points_min: 760,
+    hit_points_min: 761,
     hit_points_max: 805,
     attack_bonus: 13,
     damage_min: 285,
@@ -417,7 +420,7 @@ export const challengeRatings: ChallengeRating[] = [
     xp: 155000,
     prof_bonus: 9,
     armor_class: 19,
-    hit_points_min: 805,
+    hit_points_min: 806,
     hit_points_max: 850,
     attack_bonus: 14,
     damage_min: 303,
@@ -438,9 +441,12 @@ export interface MonsterFeature {
 }
 
 /**
- * Comprehensive list of special monster features and their CR impact
- * Based on DMG Chapter 9: Creating a Monster (pages 278-281)
- * Weights determined by effective HP/AC/Attack bonus adjustments
+ * Special monster features with the weights earlier versions used.
+ *
+ * @deprecated since 2.6.0 the calculation no longer adds these weights: summed
+ * feature bonuses were a large source of over-estimation. Magic Resistance
+ * (+2 effective AC) and physical resistance/immunity (effective HP) are applied
+ * directly in `crMath.ts`. Kept for API compatibility.
  */
 export const monsterFeatures: Record<string, MonsterFeature> = {
   // ===== LEGENDARY / MAJOR DEFENSIVE FEATURES (3-4 weight) =====

@@ -5,6 +5,44 @@ All notable changes to Dorman Lakely's 5e CR Calculator will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-09-28
+
+The calculator now targets 2024 monster stats (dnd5e 5.x / 6.x and the 2024 Monster Manual). Calculated CRs change for most NPCs.
+
+Accuracy against the listed CR of the 504 creatures in the 2024 Monster Manual:
+
+|                                 | Exact | Within 1 | Mean error | MAE  | Off by 3+ |
+| ------------------------------- | ----- | -------- | ---------- | ---- | --------- |
+| 2.5.1                           | 24.8% | 64.9%    | +0.60      | 1.28 | 64        |
+| 2.6.0 (10-fold cross-validated) | 53.5% | 93.6%    | +0.12      | 0.46 | 9         |
+
+### Changed
+
+- Expected HP, AC, attack bonus, save DC and damage per round for each CR now come from the 2024 Monster Manual (`src/data/crBaselines.ts`, medians per CR, made monotone), not the DMG 2014 table. The DMG table's hit points run two to three times higher than published stat blocks at every CR, and its attack bonuses and save DCs fall behind above CR 10.
+- The DMG procedure is unchanged in shape: defensive CR from effective HP adjusted by AC, offensive CR from damage per round adjusted by attack bonus or save DC, final CR is their average. Adjustments are one CR per 4 points (the DMG uses 2; the 2024 data supports about 4 to 5) and move along the CR ladder, so one step from 1/8 is 1/4.
+- Effective HP uses the DMG multipliers by CR band for resistance or immunity to bludgeoning, piercing or slashing damage. Other damage types no longer add CR. Magic Resistance counts as +2 effective AC.
+- Damage per round is the DMG three-round average: the best at-will routine (Multiattack or a single action), recharge and limited-use abilities spent once each when they beat it, plus bonus-action, start/end-of-turn and legendary-action damage.
+- Removed the ad hoc bonuses that pushed CRs up: +1/3 CR per feat item, +2/+1/-1 CR per immune/resistant/vulnerable damage type, and the monster feature weights (`monsterFeatures` stays in the API but is deprecated).
+- README now states the actual requirement, Foundry VTT v14 or higher (the badge and Requirements section still said v13; `module.json` already requires v14).
+- The results dialog shows effective HP and AC, the save DC when it drives the offensive adjustment, and legendary actions; the feat count is no longer shown.
+
+### Fixed
+
+- Attack bonus added every damage part's flat modifier to a running total (Acererak +71, Valindra Shadowmantle +75), inflating offensive CR.
+- Defensive CR could go negative (e.g. Aarakocra -0.375) and negative values fed the average. Both components are now clamped to CR 0.
+- Base weapon damage was counted twice on prepared dnd5e 5+ actors, whose attack activities already carry it as a base damage part.
+- Multiattack took the first digit anywhere in the description HTML (a UUID gave the Su-Monster Mummy 8 attacks), replaced only the first number word, and ignored `[[/item]]` references, "or" alternatives and "uses X three times". DPR also averaged the top three items and multiplied each by the attack count.
+- Spells ignored cantrip and upcast scaling, spells cast through 2024 Spellcasting `cast` activities were not counted, and activities stored as plain objects were skipped.
+- Damage per round between two table rows (e.g. 14.5) matched no row and gave offensive CR 0, and any DPR up to 8 mapped to CR 1/2.
+- Spellcasters' offensive CR came from the spell save DC alone, ignoring damage.
+- DMG reference table: CR 12 save DC 17 (was 18), CR 24 attack bonus +12 (was +11), damage minimums for CR 1/8 to 1/2, and HP minimums for CR 29 and 30.
+
+### Added
+
+- Offline evaluation harness (`tests/evaluation/`, `npm run eval:cr`) with k-fold and leave-one-out cross-validation, and a console exporter (`tools/export-cr-dataset.js`) to build datasets from compendiums.
+- SRD 5.2 creature fixture (CC-BY-4.0, `tests/fixtures/`, built by `tools/build-srd-fixture.cjs`) that CI uses as an accuracy regression test.
+- `crBaselines` in the module API.
+
 ## [2.5.2] - 2026-09-26
 
 ### Fixed
