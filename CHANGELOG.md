@@ -5,7 +5,7 @@ All notable changes to Dorman Lakely's 5e CR Calculator will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.0] - 2026-09-26
+## [2.6.0] - 2026-09-28
 
 The calculator now targets 2024 monster stats (dnd5e 5.x / 6.x and the 2024 Monster Manual). Calculated CRs change for most NPCs.
 
@@ -23,6 +23,7 @@ Accuracy against the listed CR of the 504 creatures in the 2024 Monster Manual:
 - Effective HP uses the DMG multipliers by CR band for resistance or immunity to bludgeoning, piercing or slashing damage. Other damage types no longer add CR. Magic Resistance counts as +2 effective AC.
 - Damage per round is the DMG three-round average: the best at-will routine (Multiattack or a single action), recharge and limited-use abilities spent once each when they beat it, plus bonus-action, start/end-of-turn and legendary-action damage.
 - Removed the ad hoc bonuses that pushed CRs up: +1/3 CR per feat item, +2/+1/-1 CR per immune/resistant/vulnerable damage type, and the monster feature weights (`monsterFeatures` stays in the API but is deprecated).
+- README now states the actual requirement, Foundry VTT v14 or higher (the badge and Requirements section still said v13; `module.json` already requires v14).
 - The results dialog shows effective HP and AC, the save DC when it drives the offensive adjustment, and legendary actions; the feat count is no longer shown.
 
 ### Fixed
